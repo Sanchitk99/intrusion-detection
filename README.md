@@ -79,7 +79,7 @@ intrusion-detection/
 
 Clone the repository:
 ```bash
-git clone https://github.com/sanchitk99/intrusion-detection.git
+git clone https://github.com/Sanchitk99/intrusion-detection.git
 cd intrusion-detection
 ```
 Install dependencies:
@@ -140,21 +140,6 @@ This regenerates:
 
 ---
 
-## Configuration Options
-
-You can modify detection behavior by editing parameters inside:
-
-agent.py
-
-Adjustable settings include:
-
-- Detection thresholds
-- Prediction confidence cutoff
-- Sampling frequency
-- Feature selection
-
----
-
 ## Testing the Detection System
 
 The dashboard includes a built-in attack simulation feature that allows you to:
@@ -174,21 +159,6 @@ The dashboard includes a built-in attack simulation feature that allows you to:
 - Security visualization tools
 - Academic submissions
 - Portfolio projects
-
----
-
-## Future Improvements
-
-Planned enhancements:
-
-- Real-time packet capture integration
-- Attack type classification panel
-- Email/SMS alerts
-- Authentication system
-- REST API endpoints
-- Docker container support
-- Database logging
-- Multi-node monitoring
 
 ---
 

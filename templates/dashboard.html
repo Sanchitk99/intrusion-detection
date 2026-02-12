@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IDS Live Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* ===== BASE ===== */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #020617;
+            color: white;
+        }
+
+        /* ===== LAYOUT ===== */
+        #appLayout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        #sidebar {
+            width: 160px;
+            background: #020617;
+            border-right: 1px solid #1e293b;
+            padding: 50px;
+            padding-top: 70px;
+            overflow-y: auto;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .sidebar-hidden #sidebar {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border: none;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        #mainContent {
+            flex: 1;
+            padding: 30px;
+            min-width: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        /* ===== BUTTON ===== */
+        #historyBtn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: #0f172a;
+            color: #e5e7eb;
+            border: 1px solid #1e293b;
+            padding: 10px 50px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #demoBtn {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 20px;
+            background: #dc2626;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* ===== TOP ROW ===== */
+        .top-row {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 40px auto;
+        }
+
+        .status-box {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 24px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .main-status { flex: 2; }
+        .system-health { flex: 1; }
+
+        .normal { color: #22c55e; }
+        .attack { color: #ef4444; }
+
+        /* ===== METRICS ===== */
+        .metric { margin-bottom: 16px; }
+        .metric-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #020617;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #22c55e;
+            transition: width 0.5s ease, background-color 0.3s ease;
+        }
+
+        /* ===== CHARTS ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;   /* 🔥 MATCH top-row */
+            margin: 40px auto;
+        }
+        .top-row h3,
+        .grid h3 {
+            margin-left: 6px;
+        }
+
+
+        canvas {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 15px;
+            height: 300px !important;
+        }
+        html, body {
+            overflow-x: hidden;
+        }
+        .action-row {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    margin: 30px auto;
+    min-width: 1000px;
+}
+
+.threat-summary {
+    width: 150px;        /* 👈 fixed, smaller width */
+    min-width: 150px;
+    padding: 20px;
+    text-align: left;
+    flex-shrink: 0;      /* prevents flex stretching */
+}
+.threat-summary p {
+    margin: 8px 0;
+    font-size: 15px;
+}
+
+
+.threat-summary h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+
+        /* ===== LOG ===== */
+        .log-entry {
+            background: #0f172a;
+            padding: 10px 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .log-normal { border-left: 4px solid #22c55e; }
+        .log-medium { border-left: 4px solid #facc15; }
+        .log-high   { border-left: 4px solid #ef4444; }
+        
+    </style>
+</head>
+
+<body>
+
+<button id="historyBtn">🛡️ Attack History</button>
+
+<div id="appLayout">
+
+    <aside id="sidebar">
+        <div id="log"></div>
+    </aside>
+
+    <main id="mainContent">
+
+        <h1>📡 Intrusion Detection System</h1>
+
+        <div class="top-row">
+            <div class="status-box main-status">
+                <h2 id="attack" class="normal">NORMAL</h2>
+                <p>Risk Level: <strong id="risk">LOW</strong></p>
+                <p>Confidence: <strong id="confidence">0%</strong></p>
+            </div>
+
+            <div class="status-box system-health">
+                <h3>💻 System Health</h3>
+
+                <div class="metric">
+                    <div class="metric-label">CPU <span id="cpuText">0%</span></div>
+                    <div class="progress-bar"><div id="cpuBar" class="progress-fill"></div></div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Memory <span id="ramText">0%</span></div>
+                    <div class="progress-bar"><div id="ramBar" class="progress-fill"></div></div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Network <span id="netText">0 MB</span></div>
+                    <div class="progress-bar"><div id="netBar" class="progress-fill"></div></div>
+                </div>
+            </div>
+        </div>
+
+<div class="action-row">
+    <button id="demoBtn">Simulate Fake Attack</button>
+
+    <div class="status-box threat-summary">
+        <h4>🧠 Threat Summary</h4>
+        <p>Mode: <strong id="modeText">LIVE</strong></p>
+        <p>Last Attack: <strong id="lastAttack">Normal</strong></p>
+        <p>Risk: <strong id="lastRisk">LOW</strong></p>
+        <p>Updated: <strong id="lastUpdate">--</strong></p>
+    </div>
+</div>
+
+        <div class="grid">
+            <div>
+                <h3>Traffic Rate</h3>
+                <canvas id="trafficChart"></canvas>
+            </div>
+            <div>
+                <h3>Active Connections</h3>
+                <canvas id="connChart"></canvas>
+            </div>
+            <div style="grid-column: span 2;">
+                <h3>Risk Confidence</h3>
+                <canvas id="riskChart"></canvas>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+
+
+<script>
+const maxPoints = 15;
+
+// ===================
+// CHART INITIALIZATION (THIS WAS MISSING)
+// ===================
+
+
+// document.addEventListener("DOMContentLoaded", function () {
+//     const toggle = document.getElementById("sidebarToggle");
+
+//     if (!toggle) {
+//         console.error("sidebarToggle element not found");
+//         return;
+//     }
+
+//     toggle.onclick = function () {
+//         document.documentElement.classList.toggle("sidebar-hidden");
+//     };
+// });
+document.getElementById("historyBtn").onclick = () => {
+    document.body.classList.toggle("sidebar-hidden");
+};
+
+
+const trafficChart = new Chart(document.getElementById('trafficChart'), {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Incoming',
+                data: [],
+                borderWidth: 2,
+                tension: 0.4
+            },
+            {
+                label: 'Outgoing',
+                data: [],
+                borderWidth: 2,
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // Sidebar toggle button
+document.getElementById("historyBtn").onclick = () => {
+    document.body.classList.toggle("sidebar-hidden");
+
+    const btn = document.getElementById("historyBtn");
+    btn.innerText = document.body.classList.contains("sidebar-hidden")
+        ? "🛡️ Show History"
+        : "❌ Hide History";
+};
+
+
+
+    // Update attack history safely
+    window.updateHistory = function () {
+        fetch("/history")
+            .then(res => res.json())
+            .then(logs => {
+                const logDiv = document.getElementById("log");
+                if (!logDiv) {
+                    console.error("log div not found");
+                    return;
+                }
+
+                logDiv.innerHTML = "";
+
+                logs.slice().reverse().forEach(item => {
+                    let cls = "log-normal";
+                    if (item.risk === "HIGH") cls = "log-high";
+                    else if (item.risk === "MEDIUM") cls = "log-medium";
+
+                    logDiv.innerHTML += `
+                        <div class="log-entry ${cls}">
+                            <strong>${item.attack}</strong><br>
+                            ${item.time} | ${item.confidence}%
+                        </div>
+                    `;
+                });
+            });
+    };
+});
+
+const connChart = new Chart(document.getElementById('connChart'), {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Connections',
+                data: [],
+                borderWidth: 2,
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+setInterval(() => {
+    fetch("/health")
+        .then(res => res.json())
+        .then(data => {
+    // CPU
+    updateBar("cpuBar", "cpuText", data.cpu, "%");
+
+    // RAM
+    updateBar("ramBar", "ramText", data.ram, "%");
+
+    // Network (scale visually, max = 200 MB)
+    const netMB = data.net / 1024;
+    const netPercent = Math.min((netMB / 200) * 100, 100);
+    updateBar("netBar", "netText", netPercent, " MB", netMB.toFixed(1));
+});
+
+}, 3000);
+
+
+const riskChart = new Chart(document.getElementById('riskChart'), {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Confidence',
+                data: [],
+                borderWidth: 2,
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+
+function updateStatus(data) {
+    document.getElementById("attack").innerText = data.attack;
+    document.getElementById("risk").innerText = data.risk;
+    document.getElementById("confidence").innerText = data.confidence + "%";
+    document.getElementById("lastAttack").innerText = data.attack;
+    document.getElementById("lastRisk").innerText = data.risk;
+    document.getElementById("lastUpdate").innerText =
+        new Date().toLocaleTimeString();
+
+
+    document.getElementById("attack").className =
+        data.attack === "Normal" ? "normal" : "attack";
+}
+
+function updateCharts(data) {
+    const time = new Date().toLocaleTimeString();
+
+    if (trafficChart.data.labels.length >= maxPoints) {
+        trafficChart.data.labels.shift();
+        trafficChart.data.datasets.forEach(d => d.data.shift());
+        connChart.data.labels.shift();
+        connChart.data.datasets[0].data.shift();
+        riskChart.data.labels.shift();
+        riskChart.data.datasets[0].data.shift();
+    }
+
+    trafficChart.data.labels.push(time);
+    trafficChart.data.datasets[0].data.push(data.dst_rate);
+    trafficChart.data.datasets[1].data.push(data.src_rate);
+
+    connChart.data.labels.push(time);
+    connChart.data.datasets[0].data.push(data.connections);
+
+    riskChart.data.labels.push(time);
+    riskChart.data.datasets[0].data.push(data.confidence);
+
+    trafficChart.update();
+    connChart.update();
+    riskChart.update();
+    updateHistory();
+}
+
+let sidebarVisible = true;
+
+setInterval(() => {
+    fetch("/metrics")
+        .then(res => res.json())
+        .then(data => {
+            if (Object.keys(data).length === 0) return;
+
+            // 🔥 SINGLE SOURCE UPDATE
+            updateStatus(data);
+            updateCharts(data);
+            updateHistory();
+        });
+}, 3000);
+
+let demoEnabled = false;
+
+document.getElementById("demoBtn").onclick = () => {
+    fetch("/toggle-demo", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+            demoEnabled = data.demo;
+            document.getElementById("demoBtn").innerText =
+                demoEnabled ? "Stop Fake Attack" : "Simulate Fake Attack";
+        });
+};
+
+function updateBar(barId, textId, value, unit, displayValue = null) {
+    const bar = document.getElementById(barId);
+    const text = document.getElementById(textId);
+
+    const percent = Math.min(Math.max(value, 0), 100);
+    bar.style.width = percent + "%";
+
+    // Color thresholds
+    if (percent < 60) {
+        bar.style.backgroundColor = "#22c55e"; // green
+    } else if (percent < 80) {
+        bar.style.backgroundColor = "#facc15"; // yellow
+    } else {
+        bar.style.backgroundColor = "#ef4444"; // red
+    }
+
+    text.innerText = displayValue !== null
+        ? displayValue + unit
+        : percent.toFixed(1) + unit;
+}
+
+</script>
+
+</body>
+</html>

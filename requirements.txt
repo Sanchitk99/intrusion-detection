@@ -6,3 +6,4 @@ joblib==1.3.2
 matplotlib==3.8.3
 seaborn==0.13.2
 psutil==5.9.8
+pynvml

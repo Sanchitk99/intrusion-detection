@@ -53,7 +53,7 @@ Flask-based interface that displays:
 ---
 
 ## Project Structure
-
+```text
 intrusion-detection/
 │
 ├── templates/            # HTML dashboard templates
@@ -72,28 +72,28 @@ intrusion-detection/
 ├── .gitignore
 ├── .gitattributes
 └── README.md
-
+```
 ---
 
 ## Installation
 
 Clone the repository:
-
+```bash
 git clone https://github.com/sanchitk99/intrusion-detection.git
 cd intrusion-detection
-
+```
 Install dependencies:
-
+```bash
 pip install -r requirements.txt
-
+```
 Run the application:
-
+```bash
 python app.py
-
+```
 Open in browser:
-
+```bash
 http://127.0.0.1:5000
-
+```
 ---
 
 ## Usage

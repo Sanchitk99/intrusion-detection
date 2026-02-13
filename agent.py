@@ -18,7 +18,10 @@ LAST_METRICS = {
     "confidence": 0.0,
     "src_rate": 0.0,
     "dst_rate": 0.0,
-    "connections": 0
+    "connections": 0,
+    "packet_sent_rate": 0,
+    "packet_recv_rate": 0
+
 }
 ATTACK_LOG = []
 LAST_LOG_TIME = 0
@@ -50,9 +53,12 @@ def get_raw_stats():
     return {
         "src_bytes": net.bytes_sent,
         "dst_bytes": net.bytes_recv,
+        "packets_sent": net.packets_sent,
+        "packets_recv": net.packets_recv,
         "connections": len(conns),
         "timestamp": time.time()
     }
+
 
 # --------------------------------------------------
 # Convert raw counters → rates (CRITICAL)
@@ -69,11 +75,14 @@ def compute_rates(current):
         return None
 
     rates = {
-        "src_rate": (current["src_bytes"] - PREV_STATS["src_bytes"]) / delta_time,
-        "dst_rate": (current["dst_bytes"] - PREV_STATS["dst_bytes"]) / delta_time,
-        "count": current["connections"],
-        "srv_count": current["connections"]
-    }
+    "src_rate": (current["src_bytes"] - PREV_STATS["src_bytes"]) / delta_time,
+    "dst_rate": (current["dst_bytes"] - PREV_STATS["dst_bytes"]) / delta_time,
+    "packet_sent_rate": (current["packets_sent"] - PREV_STATS["packets_sent"]) / delta_time,
+    "packet_recv_rate": (current["packets_recv"] - PREV_STATS["packets_recv"]) / delta_time,
+    "count": current["connections"],
+    "srv_count": current["connections"]
+}
+
 
     PREV_STATS = current
     return rates
@@ -165,7 +174,9 @@ def get_live_metrics(demo=False):
         "confidence": round(prob, 2),
         "src_rate": round(features["src_rate"], 2),
         "dst_rate": round(features["dst_rate"], 2),
-        "connections": features["count"]
+        "connections": features["count"],
+        "packet_sent_rate": round(features["packet_sent_rate"], 2),
+        "packet_recv_rate": round(features["packet_recv_rate"], 2)
     }
 
     # ✅ LOG ATTACK HISTORY

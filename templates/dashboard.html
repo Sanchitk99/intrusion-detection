@@ -21,14 +21,16 @@
 
         /* ===== SIDEBAR ===== */
         #sidebar {
-            width: 160px;
+            position: fixed;
+            top: 48px;
+            left: 0;
+            width: 260px;
+            height: 100vh;
             background: #020617;
             border-right: 1px solid #1e293b;
-            padding: 50px;
-            padding-top: 70px;
+            padding: 20px;
             overflow-y: auto;
-            flex-shrink: 0;
-            position: relative;
+            box-sizing: border-box;
         }
 
         .sidebar-hidden #sidebar {
@@ -43,6 +45,7 @@
             flex: 1;
             padding: 30px;
             min-width: 0;
+            margin-left: 260px;
         }
 
         h1 {
@@ -78,7 +81,7 @@
         .top-row {
             display: flex;
             gap: 30px;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 40px auto;
         }
 
@@ -88,6 +91,9 @@
             padding: 24px;
             flex: 1;
             text-align: center;
+        }
+        .sidebar-hidden #mainContent {
+            margin-left: 0;
         }
 
         .main-status { flex: 2; }
@@ -102,7 +108,7 @@
             display: flex;
             justify-content: space-between;
             font-size: 14px;
-            margin-bottom: 6px;
+            margin-bottom:24px;
         }
 
         .progress-bar {
@@ -133,17 +139,13 @@
         .grid h3 {
             margin-left: 6px;
         }
-
-
         canvas {
             background: #0f172a;
             border-radius: 12px;
             padding: 15px;
             height: 300px !important;
         }
-        html, body {
-            overflow-x: hidden;
-        }
+        
         .action-row {
     display: inline-flex;
     justify-content: center;
@@ -151,6 +153,10 @@
     gap: 24px;
     margin: 30px auto;
     min-width: 1000px;
+}
+html, body {
+    height: 100%;
+    overflow-x: hidden;
 }
 
 .threat-summary {
@@ -171,6 +177,13 @@
     font-size: 16px;
 }
 
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    max-width: 1000px;
+    margin: 40px auto;
+}
 
         /* ===== LOG ===== */
         .log-entry {
@@ -228,18 +241,35 @@
                 </div>
             </div>
         </div>
-
-<div class="action-row">
-    <button id="demoBtn">Simulate Fake Attack</button>
-
-    <div class="status-box threat-summary">
-        <h4>🧠 Threat Summary</h4>
-        <p>Mode: <strong id="modeText">LIVE</strong></p>
+<button id="demoBtn" style="
+    display:block;
+    margin: 20px auto;
+    padding:12px 24px;
+    background:#dc2626;
+    border:none;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+">
+    🚨 Simulate Attack
+</button>
+<div class="summary-grid">
+    <div class="status-box">
+        <h3>🧠 Threat Summary</h3>
+        <p>Mode: <strong id="mode">LIVE</strong></p>
         <p>Last Attack: <strong id="lastAttack">Normal</strong></p>
-        <p>Risk: <strong id="lastRisk">LOW</strong></p>
-        <p>Updated: <strong id="lastUpdate">--</strong></p>
+        <p>Risk: <strong id="riskSummary">LOW</strong></p>
+        <p>Updated: <strong id="updatedTime">--</strong></p>
+    </div>
+
+    <div class="status-box">
+        <h3>📦 Live Packet Counter</h3>
+        <p>Packets Sent/sec: <strong id="pktSent">0</strong></p>
+        <p>Packets Recv/sec: <strong id="pktRecv">0</strong></p>
+        <p>Connections: <strong id="connLive">0</strong></p>
     </div>
 </div>
+
 
         <div class="grid">
             <div>
@@ -263,6 +293,9 @@
 
 <script>
 const maxPoints = 15;
+let attackIntensity = 0;
+
+
 
 // ===================
 // CHART INITIALIZATION (THIS WAS MISSING)
@@ -281,9 +314,6 @@ const maxPoints = 15;
 //         document.documentElement.classList.toggle("sidebar-hidden");
 //     };
 // });
-document.getElementById("historyBtn").onclick = () => {
-    document.body.classList.toggle("sidebar-hidden");
-};
 
 
 const trafficChart = new Chart(document.getElementById('trafficChart'), {
@@ -295,20 +325,21 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
                 label: 'Incoming',
                 data: [],
                 borderWidth: 2,
-                tension: 0.4
+                tension: 0
             },
             {
                 label: 'Outgoing',
                 data: [],
                 borderWidth: 2,
-                tension: 0.4
+                tension: 0
             }
         ]
     },
     options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
+    responsive: true,
+    maintainAspectRatio: false
+}
+
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -317,41 +348,38 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("historyBtn").onclick = () => {
     document.body.classList.toggle("sidebar-hidden");
 
-    const btn = document.getElementById("historyBtn");
-    btn.innerText = document.body.classList.contains("sidebar-hidden")
-        ? "🛡️ Show History"
-        : "❌ Hide History";
+    const isHidden = document.body.classList.contains("sidebar-hidden");
+
+    document.getElementById("historyBtn").innerText =
+        isHidden ? "🛡️ Show History" : "❌ Hide History";
+
+};
+    // Update attack history safely
+window.updateHistory = function () {
+    fetch("/history")
+        .then(res => res.json())
+        .then(logs => {
+            const logDiv = document.getElementById("log");
+            logDiv.innerHTML = "";
+
+            logs.slice().reverse().forEach(item => {
+                let cls = "log-normal";
+                if (item.risk === "HIGH") cls = "log-high";
+                else if (item.risk === "MEDIUM") cls = "log-medium";
+
+                logDiv.innerHTML += `
+                    <div class="log-entry ${cls}">
+                        <strong>${item.attack}</strong><br>
+                        ${item.time} | ${item.confidence}%
+                    </div>
+                `;
+            });
+        });
 };
 
 
 
-    // Update attack history safely
-    window.updateHistory = function () {
-        fetch("/history")
-            .then(res => res.json())
-            .then(logs => {
-                const logDiv = document.getElementById("log");
-                if (!logDiv) {
-                    console.error("log div not found");
-                    return;
-                }
 
-                logDiv.innerHTML = "";
-
-                logs.slice().reverse().forEach(item => {
-                    let cls = "log-normal";
-                    if (item.risk === "HIGH") cls = "log-high";
-                    else if (item.risk === "MEDIUM") cls = "log-medium";
-
-                    logDiv.innerHTML += `
-                        <div class="log-entry ${cls}">
-                            <strong>${item.attack}</strong><br>
-                            ${item.time} | ${item.confidence}%
-                        </div>
-                    `;
-                });
-            });
-    };
 });
 
 const connChart = new Chart(document.getElementById('connChart'), {
@@ -363,14 +391,16 @@ const connChart = new Chart(document.getElementById('connChart'), {
                 label: 'Connections',
                 data: [],
                 borderWidth: 2,
-                tension: 0.4
+                tension: 0
             }
         ]
     },
     options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
+    responsive: true,
+    maintainAspectRatio: false
+}
+
+
 });
 setInterval(() => {
     fetch("/health")
@@ -386,6 +416,7 @@ setInterval(() => {
     const netMB = data.net / 1024;
     const netPercent = Math.min((netMB / 200) * 100, 100);
     updateBar("netBar", "netText", netPercent, " MB", netMB.toFixed(1));
+    
 });
 
 }, 3000);
@@ -400,7 +431,7 @@ const riskChart = new Chart(document.getElementById('riskChart'), {
                 label: 'Confidence',
                 data: [],
                 borderWidth: 2,
-                tension: 0.4
+                tension: 0
             }
         ]
     },
@@ -410,20 +441,25 @@ const riskChart = new Chart(document.getElementById('riskChart'), {
     }
 });
 
-
 function updateStatus(data) {
     document.getElementById("attack").innerText = data.attack;
     document.getElementById("risk").innerText = data.risk;
     document.getElementById("confidence").innerText = data.confidence + "%";
-    document.getElementById("lastAttack").innerText = data.attack;
-    document.getElementById("lastRisk").innerText = data.risk;
-    document.getElementById("lastUpdate").innerText =
-        new Date().toLocaleTimeString();
 
+    document.getElementById("lastAttack").innerText = data.attack;
+    document.getElementById("riskSummary").innerText = data.risk;
+    document.getElementById("updatedTime").innerText =
+        new Date().toLocaleTimeString();
 
     document.getElementById("attack").className =
         data.attack === "Normal" ? "normal" : "attack";
+    if (data.risk === "HIGH") {
+        document.body.style.background = "#1e0b0b";
+    } else {
+        document.body.style.background = "#020617";
+    }
 }
+
 
 function updateCharts(data) {
     const time = new Date().toLocaleTimeString();
@@ -446,40 +482,70 @@ function updateCharts(data) {
 
     riskChart.data.labels.push(time);
     riskChart.data.datasets[0].data.push(data.confidence);
-
     trafficChart.update();
     connChart.update();
     riskChart.update();
-    updateHistory();
+    
 }
 
 let sidebarVisible = true;
 
 setInterval(() => {
+    
     fetch("/metrics")
         .then(res => res.json())
         .then(data => {
-            if (Object.keys(data).length === 0) return;
+            if (!data || Object.keys(data).length === 0) return;
 
-            // 🔥 SINGLE SOURCE UPDATE
-            updateStatus(data);
-            updateCharts(data);
-            updateHistory();
+            let simulatedData = { ...data };
+
+            if (demoEnabled) {
+
+    attackIntensity += 80;
+    if (attackIntensity > 1200) attackIntensity = 1200;
+
+    simulatedData.attack = "DDoS Attack";
+    simulatedData.risk = "HIGH";
+    simulatedData.confidence = Math.min(85 + attackIntensity / 30, 99);
+
+    simulatedData.src_rate = data.src_rate + attackIntensity + Math.random() * 100;
+    simulatedData.dst_rate = data.dst_rate + attackIntensity + Math.random() * 100;
+    simulatedData.connections = data.connections + attackIntensity + Math.random() * 200;
+}
+            updateStatus(simulatedData);
+updateCharts(simulatedData);
+
+// Auto-refresh history ONLY if sidebar is visible
+if (!document.body.classList.contains("sidebar-hidden")) {
+    updateHistory();
+}
+
+
+            document.getElementById("pktSent").innerText = simulatedData.src_rate;
+            document.getElementById("pktRecv").innerText = simulatedData.dst_rate;
+            document.getElementById("connLive").innerText = simulatedData.connections;
         });
 }, 3000);
 
-let demoEnabled = false;
 
+let demoEnabled = false;
 document.getElementById("demoBtn").onclick = () => {
     fetch("/toggle-demo", { method: "POST" })
         .then(res => res.json())
         .then(data => {
             demoEnabled = data.demo;
-            document.getElementById("demoBtn").innerText =
-                demoEnabled ? "Stop Fake Attack" : "Simulate Fake Attack";
+
+            const btn = document.getElementById("demoBtn");
+
+            if (demoEnabled) {
+                btn.innerText = "🛑 Stop Attack Simulation";
+                btn.style.background = "#16a34a";
+            } else {
+                btn.innerText = "🚨 Simulate Attack";
+                btn.style.background = "#dc2626";
+            }
         });
 };
-
 function updateBar(barId, textId, value, unit, displayValue = null) {
     const bar = document.getElementById(barId);
     const text = document.getElementById(textId);
@@ -500,8 +566,6 @@ function updateBar(barId, textId, value, unit, displayValue = null) {
         ? displayValue + unit
         : percent.toFixed(1) + unit;
 }
-
 </script>
-
 </body>
 </html>

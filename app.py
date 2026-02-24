@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, jsonify
 from agent import get_live_metrics
 from agent import get_attack_log
 
@@ -15,7 +15,6 @@ def dashboard():
         mode="Live Traffic"
     )
 
-THRESHOLD = 70
 @app.route("/health")
 def health():
     from agent import get_system_health

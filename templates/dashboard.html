@@ -2,67 +2,185 @@
 <html>
 <head>
     <title>IDS Live Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --bg-main: #0b1220;
+            --bg-panel-soft: #111a2b;
+            --bg-panel: #101b31;
+            --border: rgba(120, 146, 180, 0.34);
+            --text-main: #e6edf7;
+            --text-muted: #98a8bd;
+            --font-body: "Space Grotesk", sans-serif;
+            --font-display: "Orbitron", sans-serif;
+            --glow-cyan: rgba(56, 189, 248, 0.12);
+            --glow-blue: rgba(59, 130, 246, 0.12);
+            --glow-amber: rgba(245, 158, 11, 0.08);
+            --alert-tint: rgba(153, 27, 27, 0);
+        }
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #020617;
+            font-family: var(--font-body);
+            position: relative;
+            background:
+                radial-gradient(circle at 10% 10%, var(--glow-cyan), transparent 42%),
+                radial-gradient(circle at 90% 14%, var(--glow-blue), transparent 44%),
+                radial-gradient(circle at 72% 82%, var(--glow-amber), transparent 48%),
+                linear-gradient(160deg, #0a1220 0%, #0e1729 45%, #0a1322 100%),
+                var(--alert-tint);
+            background-attachment: fixed;
             color: white;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04), transparent 24%),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(148, 163, 184, 0.02) 0,
+                    rgba(148, 163, 184, 0.02) 1px,
+                    transparent 1px,
+                    transparent 140px
+                );
+            opacity: 0.2;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            inset: -20vh -10vw;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 24% 38%, rgba(56, 189, 248, 0.12), transparent 36%),
+                radial-gradient(circle at 80% 22%, rgba(59, 130, 246, 0.1), transparent 34%);
+            filter: blur(34px);
+            animation: driftGlow 22s ease-in-out infinite alternate;
+        }
+        body.risk-high {
+            --alert-tint: rgba(153, 27, 27, 0.12);
         }
         #appLayout {
             display: flex;
             min-height: 100vh;
+            position: relative;
+            z-index: 1;
         }
         #sidebar {
             position: fixed;
-            top: 48px;
+            top: 0;
             left: 0;
-            width: 260px;
+            width: 320px;
             height: 100vh;
-            background: #020617;
-            border-right: 1px solid #1e293b;
-            padding: 20px;
+            background:
+                linear-gradient(200deg, rgba(59, 130, 246, 0.08) 0%, transparent 44%),
+                linear-gradient(180deg, rgba(11, 21, 36, 0.98) 0%, rgba(9, 16, 30, 0.98) 100%);
+            border-right: 1px solid var(--border);
+            box-shadow: 8px 0 26px rgba(0, 0, 0, 0.28);
+            padding: 84px 16px 16px;
             overflow-y: auto;
             box-sizing: border-box;
+            transition: transform 0.25s ease;
         }
 
         .sidebar-hidden #sidebar {
-            width: 0;
-            padding: 0;
-            overflow: hidden;
-            border: none;
+            transform: translateX(-100%);
         }
         #mainContent {
             flex: 1;
             padding: 30px;
             min-width: 0;
-            margin-left: 260px;
+            margin-left: 320px;
+            transition: margin-left 0.25s ease;
         }
         h1 {
             text-align: center;
+            font-family: var(--font-display);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: clamp(1.3rem, 2.2vw, 2.1rem);
+            margin: 0 0 8px;
+            color: #edf3fc;
+            text-shadow: 0 2px 10px rgba(2, 8, 23, 0.35);
         }
         #historyBtn {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 16px;
+            left: 16px;
             z-index: 1000;
-            background: #0f172a;
-            color: #e5e7eb;
-            border: 1px solid #1e293b;
-            padding: 10px 50px;
+            background: linear-gradient(180deg, #102039 0%, #0a1528 100%);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
             border-radius: 8px;
             cursor: pointer;
+            min-width: 124px;
+            font-weight: 600;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        #historyBtn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(96, 165, 250, 0.5);
+            box-shadow: 0 8px 18px rgba(4, 25, 42, 0.34);
         }
         #demoBtn {
             display: block;
-            margin: 30px auto;
+            margin: 0;
             padding: 12px 20px;
-            background: #dc2626;
-            border: none;
-            border-radius: 8px;
+            background: linear-gradient(180deg, #fb923c 0%, #c2410c 100%);
+            border: 1px solid rgba(249, 115, 22, 0.62);
+            border-radius: 10px;
             color: white;
             cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+        #demoBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+            box-shadow: 0 10px 20px rgba(194, 65, 12, 0.45);
+        }
+        #demoBtn.is-active {
+            background: linear-gradient(180deg, #38bdf8 0%, #2563eb 100%);
+            border-color: rgba(56, 189, 248, 0.56);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+        }
+        .action-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 28px auto 0;
+            flex-wrap: wrap;
+        }
+        #reportBtn {
+            margin: 0;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(96, 165, 250, 0.58);
+            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #f8fbff;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+        #reportBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+            box-shadow: 0 10px 18px rgba(29, 78, 216, 0.32);
+        }
+        #reportBtn:disabled {
+            opacity: 0.75;
+            cursor: wait;
+            transform: none;
+            box-shadow: none;
         }
         .top-row {
             display: flex;
@@ -71,11 +189,52 @@
             margin: 40px auto;
         }
         .status-box {
-            background: #0f172a;
-            border-radius: 12px;
-            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(180deg, rgba(18, 30, 50, 0.9) 0%, rgba(14, 24, 40, 0.94) 100%);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 24px rgba(2, 8, 23, 0.24), inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+            border-radius: 14px;
+            padding: 20px 22px;
             flex: 1;
-            text-align: center;
+            text-align: left;
+            backdrop-filter: blur(6px);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .status-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #38bdf8 0%, #60a5fa 55%, #22c55e 100%);
+            opacity: 0.7;
+        }
+        .status-box:hover {
+            transform: translateY(-2px);
+            border-color: rgba(96, 165, 250, 0.38);
+            box-shadow: 0 14px 28px rgba(2, 8, 23, 0.28), inset 0 0 0 1px rgba(59, 130, 246, 0.15);
+        }
+        .status-box h3 {
+            margin: 0 0 10px;
+        }
+        .status-box p {
+            margin: 0;
+            padding: 8px 0;
+            color: var(--text-muted);
+            font-size: 0.94rem;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed rgba(148, 163, 184, 0.22);
+        }
+        .status-box p:last-child {
+            border-bottom: none;
+        }
+        .status-box strong {
+            color: var(--text-main);
+            font-weight: 600;
         }
         .sidebar-hidden #mainContent {
             margin-left: 0;
@@ -83,19 +242,25 @@
         .main-status { flex: 2; }
         .system-health { flex: 1; }
 
-        .normal { color: #22c55e; }
-        .attack { color: #ef4444; }
+        .normal { color: #22c55e; text-shadow: none; }
+        .attack { color: #f97316; text-shadow: none; }
+        #attack {
+            margin: 0 0 8px;
+            font-size: clamp(1.35rem, 2.2vw, 2rem);
+            letter-spacing: 0.06em;
+        }
         .metric { margin-bottom: 16px; }
         .metric-label {
             display: flex;
             justify-content: space-between;
             font-size: 14px;
-            margin-bottom:24px;
+            margin-bottom: 10px;
+            color: var(--text-main);
         }
         .progress-bar {
             width: 100%;
             height: 10px;
-            background: #020617;
+            background: #0b1628;
             border-radius: 6px;
             overflow: hidden;
         }
@@ -113,42 +278,106 @@
             max-width: 1200px;
             margin: 40px auto;
         }
+        .chart-panel {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(16, 28, 47, 0.92) 0%, rgba(12, 21, 36, 0.96) 100%);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 10px 24px rgba(2, 8, 23, 0.24);
+            padding: 12px 12px 10px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .chart-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.65), rgba(96, 165, 250, 0.5));
+        }
+        .chart-panel:hover {
+            transform: translateY(-2px);
+            border-color: rgba(96, 165, 250, 0.4);
+        }
+        .chart-panel.panel-wide {
+            grid-column: span 2;
+        }
+        .chart-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 4px 8px 10px;
+        }
+        .chart-head h3 {
+            margin: 0;
+        }
+        .focus-btn {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.86);
+            color: #dce8f8;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .focus-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
+        .focus-btn.active {
+            background: rgba(30, 64, 175, 0.28);
+            border-color: rgba(96, 165, 250, 0.7);
+        }
+        #clearFocusBtn {
+            display: none;
+            margin: -10px auto 10px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(15, 23, 42, 0.92);
+            color: #e5edf8;
+            border-radius: 9px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        body.focus-active #clearFocusBtn {
+            display: block;
+        }
+        .grid.focus-mode {
+            grid-template-columns: 1fr;
+        }
+        .grid.focus-mode .chart-panel {
+            display: none;
+        }
+        .grid.focus-mode .chart-panel.is-focused {
+            display: block;
+            grid-column: 1 / -1;
+        }
+        .grid.focus-mode .chart-panel.is-focused canvas {
+            height: 420px !important;
+        }
         .top-row h3,
         .grid h3 {
-            margin-left: 6px;
+            margin: 4px 8px 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.83rem;
+            color: #b3c4d8;
         }
         canvas {
-            background: #0f172a;
-            border-radius: 12px;
-            padding: 15px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            border-radius: 10px;
+            padding: 8px;
             height: 300px !important;
         }
-        .action-row {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 24px;
-    margin: 30px auto;
-    min-width: 1000px;
-}
 html, body {
     height: 100%;
     overflow-x: hidden;
-}
-.threat-summary {
-    width: 150px;
-    min-width: 150px;
-    padding: 20px;
-    text-align: left;
-    flex-shrink: 0;      
-}
-.threat-summary p {
-    margin: 8px 0;
-    font-size: 15px;
-}
-.threat-summary h4 {
-    margin: 0 0 10px 0;
-    font-size: 16px;
 }
 .summary-grid {
     display: grid;
@@ -157,27 +386,103 @@ html, body {
     max-width: 1000px;
     margin: 40px auto;
 }
+        .summary-grid .status-box p {
+            font-size: 0.92rem;
+        }
+        .sidebar-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            margin: -6px 0 12px;
+            padding: 14px;
+            background: rgba(14, 24, 42, 0.84);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            backdrop-filter: blur(3px);
+        }
+        .sidebar-title {
+            margin: 0;
+            font-size: 15px;
+            letter-spacing: 0.3px;
+            font-family: var(--font-display);
+        }
+        .sidebar-subtitle {
+            margin: 6px 0 0;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        #log {
+            display: grid;
+            gap: 10px;
+            align-content: start;
+            padding-bottom: 12px;
+        }
         .log-entry {
-            background: #0f172a;
-            padding: 10px 10px;
+            background: var(--bg-panel-soft);
+            border: 1px solid var(--border);
+            padding: 10px;
             border-radius: 10px;
-            margin-bottom: 10px;
             font-size: 13px;
+            line-height: 1.35;
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+        .log-entry:hover {
+            transform: translateY(-1px);
+            border-color: rgba(96, 165, 250, 0.4);
+        }
+        .log-meta {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        .log-empty {
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-align: center;
+            padding: 16px 10px;
         }
         .log-normal { border-left: 4px solid #22c55e; }
-        .log-medium { border-left: 4px solid #facc15; }
-        .log-high   { border-left: 4px solid #ef4444; }
+        .log-medium { border-left: 4px solid #ffd247; }
+        .log-high   { border-left: 4px solid #f97316; }
+        @media (max-width: 900px) {
+            #sidebar {
+                width: min(84vw, 320px);
+            }
+            #mainContent {
+                margin-left: 0;
+            }
+            .top-row,
+            .summary-grid {
+                grid-template-columns: 1fr;
+                display: grid;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .chart-panel.panel-wide {
+                grid-column: auto;
+            }
+        }
+        @keyframes driftGlow {
+            0% { transform: translate3d(-2%, -1%, 0) scale(1); }
+            100% { transform: translate3d(2%, 1%, 0) scale(1.05); }
+        }
         
     </style>
 </head>
 <body>
-<button id="historyBtn">🛡️ Attack History</button>
+<button id="historyBtn">Hide History</button>
 <div id="appLayout">
     <aside id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">Attack History</h2>
+            <p class="sidebar-subtitle">Latest 10 detection events</p>
+        </div>
         <div id="log"></div>
     </aside>
     <main id="mainContent">
-        <h1>📡 Intrusion Detection System</h1>
+        <h1>Intrusion Detection System</h1>
         <div class="top-row">
             <div class="status-box main-status">
                 <h2 id="attack" class="normal">NORMAL</h2>
@@ -186,7 +491,7 @@ html, body {
             </div>
 
             <div class="status-box system-health">
-                <h3>💻 System Health</h3>
+                <h3>System Health</h3>
 
                 <div class="metric">
                     <div class="metric-label">CPU <span id="cpuText">0%</span></div>
@@ -204,21 +509,17 @@ html, body {
                 </div>
             </div>
         </div>
-<button id="demoBtn" style="
-    display:block;
-    margin: 20px auto;
-    padding:12px 24px;
-    background:#dc2626;
-    border:none;
-    border-radius:8px;
-    color:white;
-    cursor:pointer;
-">
-    🚨 Simulate Attack
-</button>
+<div class="action-row">
+    <button id="demoBtn">
+        Simulate Attack
+    </button>
+    <button id="reportBtn" type="button">
+        Download Report
+    </button>
+</div>
 <div class="summary-grid">
     <div class="status-box">
-        <h3>🧠 Threat Summary</h3>
+        <h3>Threat Summary</h3>
         <p>Mode: <strong id="mode">LIVE</strong></p>
         <p>Last Attack: <strong id="lastAttack">Normal</strong></p>
         <p>Risk: <strong id="riskSummary">LOW</strong></p>
@@ -226,23 +527,33 @@ html, body {
     </div>
 
     <div class="status-box">
-        <h3>📦 Live Packet Counter</h3>
+        <h3>Live Packet Counter</h3>
         <p>Packets Sent/sec: <strong id="pktSent">0</strong></p>
         <p>Packets Recv/sec: <strong id="pktRecv">0</strong></p>
         <p>Connections: <strong id="connLive">0</strong></p>
     </div>
 </div>
-        <div class="grid">
-            <div>
-                <h3>Traffic Rate</h3>
+        <button id="clearFocusBtn" type="button">Exit Focus</button>
+        <div class="grid" id="chartsGrid">
+            <div class="chart-panel" data-panel="traffic">
+                <div class="chart-head">
+                    <h3>Traffic Rate</h3>
+                    <button class="focus-btn" type="button" data-focus="traffic">Focus</button>
+                </div>
                 <canvas id="trafficChart"></canvas>
             </div>
-            <div>
-                <h3>Active Connections</h3>
+            <div class="chart-panel" data-panel="connections">
+                <div class="chart-head">
+                    <h3>Active Connections</h3>
+                    <button class="focus-btn" type="button" data-focus="connections">Focus</button>
+                </div>
                 <canvas id="connChart"></canvas>
             </div>
-            <div style="grid-column: span 2;">
-                <h3>Risk Confidence</h3>
+            <div class="chart-panel panel-wide" data-panel="confidence">
+                <div class="chart-head">
+                    <h3>Risk Confidence</h3>
+                    <button class="focus-btn" type="button" data-focus="confidence">Focus</button>
+                </div>
                 <canvas id="riskChart"></canvas>
             </div>
         </div>
@@ -252,6 +563,68 @@ html, body {
 <script>
 const maxPoints = 15;
 let attackIntensity = 0;
+const THRESHOLDS = {
+    traffic: { warning: 500000, critical: 1500000 },
+    connections: { warning: 120, critical: 250 },
+    confidence: { warning: 70, critical: 85 }
+};
+const chartTextColor = "#a9bdd5";
+const chartGridColor = "rgba(148, 163, 184, 0.16)";
+const chartBorder = "rgba(96, 165, 250, 0.45)";
+
+Chart.defaults.color = chartTextColor;
+Chart.defaults.font.family = '"Space Grotesk", sans-serif';
+
+const buildChartOptions = () => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    normalized: true,
+    interaction: {
+        mode: "nearest",
+        axis: "x",
+        intersect: false
+    },
+    animation: {
+        duration: 520,
+        easing: "easeOutCubic"
+    },
+    plugins: {
+        legend: {
+            labels: {
+                color: "#cfdef0",
+                boxWidth: 12
+            }
+        },
+        tooltip: {
+            backgroundColor: "rgba(11, 20, 34, 0.96)",
+            borderColor: chartBorder,
+            borderWidth: 1,
+            titleColor: "#f8fbff",
+            bodyColor: "#d5e3f5",
+            intersect: false
+        }
+    },
+    scales: {
+        x: {
+            ticks: {
+                color: chartTextColor,
+                maxRotation: 0
+            },
+            grid: {
+                color: chartGridColor
+            }
+        },
+        y: {
+            ticks: {
+                color: chartTextColor
+            },
+            grid: {
+                color: chartGridColor
+            }
+        }
+    }
+});
+
 const trafficChart = new Chart(document.getElementById('trafficChart'), {
     type: 'line',
     data: {
@@ -260,21 +633,56 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: 'Incoming',
                 data: [],
+                borderColor: "#38bdf8",
+                backgroundColor: "rgba(56, 189, 248, 0.14)",
+                fill: true,
+                pointRadius: 0,
+                pointHitRadius: 16,
+                pointHoverRadius: 5,
+                pointHoverBorderWidth: 2,
+                pointHoverBackgroundColor: "#f8fbff",
+                pointHoverBorderColor: "#38bdf8",
                 borderWidth: 2,
-                tension: 0
+                tension: 0.3
             },
             {
                 label: 'Outgoing',
                 data: [],
+                borderColor: "#60a5fa",
+                backgroundColor: "rgba(96, 165, 250, 0.12)",
+                fill: true,
+                pointRadius: 0,
+                pointHitRadius: 16,
+                pointHoverRadius: 5,
+                pointHoverBorderWidth: 2,
+                pointHoverBackgroundColor: "#f8fbff",
+                pointHoverBorderColor: "#60a5fa",
                 borderWidth: 2,
+                tension: 0.3
+            },
+            {
+                label: "Warning Threshold",
+                data: [],
+                borderColor: "#f59e0b",
+                borderDash: [6, 6],
+                borderWidth: 1.6,
+                pointRadius: 0,
+                fill: false,
+                tension: 0
+            },
+            {
+                label: "Critical Threshold",
+                data: [],
+                borderColor: "#ef4444",
+                borderDash: [6, 6],
+                borderWidth: 1.6,
+                pointRadius: 0,
+                fill: false,
                 tension: 0
             }
         ]
     },
-    options: {
-    responsive: true,
-    maintainAspectRatio: false
-}
+    options: buildChartOptions()
 });
 document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("historyBtn").onclick = () => {
@@ -283,7 +691,7 @@ document.getElementById("historyBtn").onclick = () => {
     const isHidden = document.body.classList.contains("sidebar-hidden");
 
     document.getElementById("historyBtn").innerText =
-        isHidden ? "🛡️ Show History" : "❌ Hide History";
+        isHidden ? "Show History" : "Hide History";
 
 };
 window.updateHistory = function () {
@@ -292,6 +700,10 @@ window.updateHistory = function () {
         .then(logs => {
             const logDiv = document.getElementById("log");
             logDiv.innerHTML = "";
+            if (!logs.length) {
+                logDiv.innerHTML = `<div class="log-empty">No events yet</div>`;
+                return;
+            }
 
             logs.slice().reverse().forEach(item => {
                 let cls = "log-normal";
@@ -301,7 +713,7 @@ window.updateHistory = function () {
                 logDiv.innerHTML += `
                     <div class="log-entry ${cls}">
                         <strong>${item.attack}</strong><br>
-                        ${item.time} | ${item.confidence}%
+                        <span class="log-meta">${item.time} | ${item.confidence}%</span>
                     </div>
                 `;
             });
@@ -316,15 +728,41 @@ const connChart = new Chart(document.getElementById('connChart'), {
             {
                 label: 'Connections',
                 data: [],
+                borderColor: "#22c55e",
+                backgroundColor: "rgba(34, 197, 94, 0.12)",
+                fill: true,
+                pointRadius: 0,
+                pointHitRadius: 16,
+                pointHoverRadius: 5,
+                pointHoverBorderWidth: 2,
+                pointHoverBackgroundColor: "#f8fbff",
+                pointHoverBorderColor: "#22c55e",
                 borderWidth: 2,
+                tension: 0.3
+            },
+            {
+                label: "Warning Threshold",
+                data: [],
+                borderColor: "#f59e0b",
+                borderDash: [6, 6],
+                borderWidth: 1.6,
+                pointRadius: 0,
+                fill: false,
+                tension: 0
+            },
+            {
+                label: "Critical Threshold",
+                data: [],
+                borderColor: "#ef4444",
+                borderDash: [6, 6],
+                borderWidth: 1.6,
+                pointRadius: 0,
+                fill: false,
                 tension: 0
             }
         ]
     },
-    options: {
-    responsive: true,
-    maintainAspectRatio: false
-}
+    options: buildChartOptions()
 });
 setInterval(() => {
     fetch("/health")
@@ -352,16 +790,90 @@ const riskChart = new Chart(document.getElementById('riskChart'), {
             {
                 label: 'Confidence',
                 data: [],
+                borderColor: "#f59e0b",
+                backgroundColor: "rgba(245, 158, 11, 0.14)",
+                fill: true,
+                pointRadius: 0,
+                pointHitRadius: 16,
+                pointHoverRadius: 5,
+                pointHoverBorderWidth: 2,
+                pointHoverBackgroundColor: "#f8fbff",
+                pointHoverBorderColor: "#f59e0b",
                 borderWidth: 2,
+                tension: 0.3
+            },
+            {
+                label: "Warning Threshold",
+                data: [],
+                borderColor: "#f59e0b",
+                borderDash: [6, 6],
+                borderWidth: 1.6,
+                pointRadius: 0,
+                fill: false,
+                tension: 0
+            },
+            {
+                label: "Critical Threshold",
+                data: [],
+                borderColor: "#ef4444",
+                borderDash: [6, 6],
+                borderWidth: 1.6,
+                pointRadius: 0,
+                fill: false,
                 tension: 0
             }
         ]
     },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
+    options: buildChartOptions()
+});
+const chartsGrid = document.getElementById("chartsGrid");
+const clearFocusBtn = document.getElementById("clearFocusBtn");
+const chartPanels = Array.from(document.querySelectorAll(".chart-panel"));
+const focusButtons = Array.from(document.querySelectorAll(".focus-btn"));
+let activeFocusedPanel = null;
+
+function resizeChartsSoon() {
+    setTimeout(() => {
+        trafficChart.resize();
+        connChart.resize();
+        riskChart.resize();
+    }, 240);
+}
+
+function applyFocus(panelName) {
+    activeFocusedPanel = panelName;
+    const focusActive = Boolean(panelName);
+
+    document.body.classList.toggle("focus-active", focusActive);
+    chartsGrid.classList.toggle("focus-mode", focusActive);
+
+    chartPanels.forEach((panel) => {
+        panel.classList.toggle("is-focused", panel.dataset.panel === panelName);
+    });
+
+    focusButtons.forEach((btn) => {
+        const isActive = btn.dataset.focus === panelName;
+        btn.classList.toggle("active", isActive);
+        btn.textContent = isActive ? "Focused" : "Focus";
+    });
+
+    resizeChartsSoon();
+}
+
+focusButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        const panelName = btn.dataset.focus;
+        applyFocus(activeFocusedPanel === panelName ? null : panelName);
+    });
+});
+
+clearFocusBtn.addEventListener("click", () => applyFocus(null));
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && activeFocusedPanel) {
+        applyFocus(null);
     }
 });
+
 function updateStatus(data) {
     document.getElementById("attack").innerText = data.attack;
     document.getElementById("risk").innerText = data.risk;
@@ -374,11 +886,7 @@ function updateStatus(data) {
 
     document.getElementById("attack").className =
         data.attack === "Normal" ? "normal" : "attack";
-    if (data.risk === "HIGH") {
-        document.body.style.background = "#1e0b0b";
-    } else {
-        document.body.style.background = "#020617";
-    }
+    document.body.classList.toggle("risk-high", data.risk === "HIGH");
 }
 function updateCharts(data) {
     const time = new Date().toLocaleTimeString();
@@ -394,18 +902,23 @@ function updateCharts(data) {
     trafficChart.data.labels.push(time);
     trafficChart.data.datasets[0].data.push(data.dst_rate);
     trafficChart.data.datasets[1].data.push(data.src_rate);
+    trafficChart.data.datasets[2].data = Array(trafficChart.data.labels.length).fill(THRESHOLDS.traffic.warning);
+    trafficChart.data.datasets[3].data = Array(trafficChart.data.labels.length).fill(THRESHOLDS.traffic.critical);
 
     connChart.data.labels.push(time);
     connChart.data.datasets[0].data.push(data.connections);
+    connChart.data.datasets[1].data = Array(connChart.data.labels.length).fill(THRESHOLDS.connections.warning);
+    connChart.data.datasets[2].data = Array(connChart.data.labels.length).fill(THRESHOLDS.connections.critical);
 
     riskChart.data.labels.push(time);
     riskChart.data.datasets[0].data.push(data.confidence);
+    riskChart.data.datasets[1].data = Array(riskChart.data.labels.length).fill(THRESHOLDS.confidence.warning);
+    riskChart.data.datasets[2].data = Array(riskChart.data.labels.length).fill(THRESHOLDS.confidence.critical);
     trafficChart.update();
     connChart.update();
     riskChart.update();
     
 }
-let sidebarVisible = true;
 
 setInterval(() => {
     
@@ -451,14 +964,145 @@ document.getElementById("demoBtn").onclick = () => {
             const btn = document.getElementById("demoBtn");
 
             if (demoEnabled) {
-                btn.innerText = "🛑 Stop Attack Simulation";
-                btn.style.background = "#16a34a";
+                btn.innerText = "Stop Attack Simulation";
+                btn.classList.add("is-active");
             } else {
-                btn.innerText = "🚨 Simulate Attack";
-                btn.style.background = "#dc2626";
+                btn.innerText = "Simulate Attack";
+                btn.classList.remove("is-active");
             }
         });
 };
+const reportBtn = document.getElementById("reportBtn");
+
+function csvEscape(value) {
+    const str = value === null || value === undefined ? "" : String(value);
+    if (/[",\n]/.test(str)) {
+        return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+}
+
+function downloadCsv(content, fileName) {
+    const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+}
+
+async function downloadReport() {
+    const originalText = reportBtn.innerText;
+    reportBtn.disabled = true;
+    reportBtn.innerText = "Preparing...";
+
+    try {
+        const [metricsRes, healthRes, historyRes] = await Promise.all([
+            fetch("/metrics"),
+            fetch("/health"),
+            fetch("/history")
+        ]);
+
+        if (!metricsRes.ok || !healthRes.ok || !historyRes.ok) {
+            throw new Error("Failed to fetch report data.");
+        }
+
+        const metrics = await metricsRes.json();
+        const health = await healthRes.json();
+        const history = await historyRes.json();
+
+        const generatedAt = new Date();
+        const mode = demoEnabled ? "DEMO" : "LIVE";
+        const rows = [];
+        rows.push([
+            "record_type",
+            "generated_at",
+            "mode",
+            "time",
+            "attack",
+            "risk",
+            "confidence",
+            "cpu_percent",
+            "ram_percent",
+            "network_kb_sent",
+            "src_rate",
+            "dst_rate",
+            "connections",
+            "packet_sent_rate",
+            "packet_recv_rate",
+            "traffic_warning",
+            "traffic_critical",
+            "connections_warning",
+            "connections_critical",
+            "confidence_warning",
+            "confidence_critical"
+        ].map(csvEscape).join(","));
+
+        rows.push([
+            "snapshot",
+            generatedAt.toISOString(),
+            mode,
+            generatedAt.toLocaleTimeString(),
+            metrics.attack,
+            metrics.risk,
+            metrics.confidence,
+            health.cpu,
+            health.ram,
+            health.net,
+            metrics.src_rate,
+            metrics.dst_rate,
+            metrics.connections,
+            metrics.packet_sent_rate,
+            metrics.packet_recv_rate,
+            THRESHOLDS.traffic.warning,
+            THRESHOLDS.traffic.critical,
+            THRESHOLDS.connections.warning,
+            THRESHOLDS.connections.critical,
+            THRESHOLDS.confidence.warning,
+            THRESHOLDS.confidence.critical
+        ].map(csvEscape).join(","));
+
+        history.forEach((item) => {
+            rows.push([
+                "history",
+                generatedAt.toISOString(),
+                mode,
+                item.time,
+                item.attack,
+                item.risk,
+                item.confidence,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                THRESHOLDS.traffic.warning,
+                THRESHOLDS.traffic.critical,
+                THRESHOLDS.connections.warning,
+                THRESHOLDS.connections.critical,
+                THRESHOLDS.confidence.warning,
+                THRESHOLDS.confidence.critical
+            ].map(csvEscape).join(","));
+        });
+
+        const stamp = generatedAt.toISOString().replace(/[:.]/g, "-");
+        downloadCsv(rows.join("\r\n"), `ids-report-${stamp}.csv`);
+    } catch (err) {
+        alert("Unable to generate report right now.");
+    } finally {
+        reportBtn.disabled = false;
+        reportBtn.innerText = originalText;
+    }
+}
+
+reportBtn.addEventListener("click", downloadReport);
+
 function updateBar(barId, textId, value, unit, displayValue = null) {
     const bar = document.getElementById(barId);
     const text = document.getElementById(textId);
@@ -466,11 +1110,11 @@ function updateBar(barId, textId, value, unit, displayValue = null) {
     const percent = Math.min(Math.max(value, 0), 100);
     bar.style.width = percent + "%";
     if (percent < 60) {
-        bar.style.backgroundColor = "#22c55e"; // green
+        bar.style.backgroundColor = "#22c55e";
     } else if (percent < 80) {
-        bar.style.backgroundColor = "#facc15"; // yellow
+        bar.style.backgroundColor = "#ffd247";
     } else {
-        bar.style.backgroundColor = "#ef4444"; // red
+        bar.style.backgroundColor = "#ef4444";
     }
 
     text.innerText = displayValue !== null
@@ -480,3 +1124,4 @@ function updateBar(barId, textId, value, unit, displayValue = null) {
 </script>
 </body>
 </html>
+

@@ -7,11 +7,6 @@ import random
 import time
 
 
-LAST_RESULT = {
-    "attack": "Normal",
-    "risk": "LOW",
-    "confidence": 0.0
-}
 LAST_METRICS = {
     "attack": "Normal",
     "risk": "LOW",
@@ -41,7 +36,6 @@ attack_encoder = joblib.load(os.path.join(BASE_DIR, "attack_encoder.pkl"))
 # Globals for rate calculation
 # --------------------------------------------------
 PREV_STATS = None
-INTERVAL = 3  # seconds between checks
 
 # --------------------------------------------------
 # Collect raw OS network stats
@@ -180,12 +174,6 @@ def get_live_metrics(demo=False):
     }
 
     # ✅ LOG ATTACK HISTORY
-    entry = {
-        "time": time.strftime("%H:%M:%S"),
-        "attack": attack_type,
-        "risk": risk,
-        "confidence": round(prob, 2)
-    }
     now = time.time()
     if now - LAST_LOG_TIME >= LOG_INTERVAL:
         LAST_LOG_TIME = now
@@ -202,8 +190,7 @@ def get_live_metrics(demo=False):
 
 
     return LAST_METRICS
-    
-import psutil
+
 def get_system_health():
     # interval=0.1 forces an actual measurement
     cpu = psutil.cpu_percent(interval=0.1)
@@ -213,22 +200,6 @@ def get_system_health():
         "ram": psutil.virtual_memory().percent,
         "net": psutil.net_io_counters().bytes_sent // 1024
     }
-
-    # ------------------------------
-    # Store attack history
-    # ------------------------------
-    entry = {
-        "time": time.strftime("%H:%M:%S"),
-        "attack": LAST_METRICS["attack"],
-        "risk": LAST_METRICS["risk"],
-        "confidence": LAST_METRICS["confidence"]
-    }
-
-    ATTACK_LOG.append(entry)
-    if len(ATTACK_LOG) > MAX_LOG_SIZE:
-        ATTACK_LOG.pop(0)
-
-    return LAST_METRICS
 
 def get_attack_log():
     return ATTACK_LOG

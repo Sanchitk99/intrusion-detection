@@ -1,3 +1,7 @@
 KDDTrain+.txt
 KDDTest+.txt
 dataset
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

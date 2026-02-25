@@ -5,8 +5,6 @@ import pandas as pd
 import os
 import random
 import time
-
-
 LAST_METRICS = {
     "attack": "Normal",
     "risk": "LOW",
@@ -31,12 +29,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model = joblib.load(os.path.join(BASE_DIR, "model.pkl"))
 scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
 attack_encoder = joblib.load(os.path.join(BASE_DIR, "attack_encoder.pkl"))
-
 # --------------------------------------------------
 # Globals for rate calculation
 # --------------------------------------------------
 PREV_STATS = None
-
 # --------------------------------------------------
 # Collect raw OS network stats
 # --------------------------------------------------

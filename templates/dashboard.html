@@ -4,32 +4,40 @@
     <title>IDS Live Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-main: #0b1220;
-            --bg-panel-soft: #111a2b;
-            --bg-panel: #101b31;
-            --border: rgba(120, 146, 180, 0.34);
-            --text-main: #e6edf7;
-            --text-muted: #98a8bd;
-            --font-body: "Space Grotesk", sans-serif;
-            --font-display: "Orbitron", sans-serif;
-            --glow-cyan: rgba(56, 189, 248, 0.12);
-            --glow-blue: rgba(59, 130, 246, 0.12);
-            --glow-amber: rgba(245, 158, 11, 0.08);
+            --bg-main: #050505;
+            --bg-panel-soft: #0f0f0f;
+            --bg-panel: #171717;
+            --border: rgba(245, 158, 11, 0.38);
+            --text-main: #f8f9fa;
+            --text-muted: #c6c6c6;
+            --font-body: "Exo 2", "Segoe UI", sans-serif;
+            --font-display: "JetBrains Mono", "Consolas", monospace;
+            --font-data: "JetBrains Mono", "Consolas", monospace;
+            --glow-cyan: rgba(245, 158, 11, 0.18);
+            --glow-blue: rgba(255, 255, 255, 0.06);
+            --glow-amber: rgba(245, 158, 11, 0.07);
             --alert-tint: rgba(153, 27, 27, 0);
         }
         body {
             margin: 0;
             font-family: var(--font-body);
+            font-size: 15.5px;
+            font-weight: 500;
+            line-height: 1.42;
+            letter-spacing: 0.01em;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             position: relative;
             background:
                 radial-gradient(circle at 10% 10%, var(--glow-cyan), transparent 42%),
                 radial-gradient(circle at 90% 14%, var(--glow-blue), transparent 44%),
                 radial-gradient(circle at 72% 82%, var(--glow-amber), transparent 48%),
-                linear-gradient(160deg, #0a1220 0%, #0e1729 45%, #0a1322 100%),
+                linear-gradient(160deg, #020202 0%, #0a0a0a 45%, #010101 100%),
                 var(--alert-tint);
             background-attachment: fixed;
             color: white;
@@ -43,8 +51,8 @@
                 linear-gradient(to bottom, rgba(255, 255, 255, 0.04), transparent 24%),
                 repeating-linear-gradient(
                     90deg,
-                    rgba(148, 163, 184, 0.02) 0,
-                    rgba(148, 163, 184, 0.02) 1px,
+                    rgba(255, 255, 255, 0.03) 0,
+                    rgba(255, 255, 255, 0.03) 1px,
                     transparent 1px,
                     transparent 140px
                 );
@@ -56,8 +64,8 @@
             inset: -20vh -10vw;
             pointer-events: none;
             background:
-                radial-gradient(circle at 24% 38%, rgba(56, 189, 248, 0.12), transparent 36%),
-                radial-gradient(circle at 80% 22%, rgba(59, 130, 246, 0.1), transparent 34%);
+                radial-gradient(circle at 24% 38%, rgba(245, 158, 11, 0.14), transparent 36%),
+                radial-gradient(circle at 80% 22%, rgba(255, 255, 255, 0.07), transparent 34%);
             filter: blur(34px);
             animation: driftGlow 22s ease-in-out infinite alternate;
         }
@@ -77,8 +85,8 @@
             width: 320px;
             height: 100vh;
             background:
-                linear-gradient(200deg, rgba(59, 130, 246, 0.08) 0%, transparent 44%),
-                linear-gradient(180deg, rgba(11, 21, 36, 0.98) 0%, rgba(9, 16, 30, 0.98) 100%);
+                linear-gradient(200deg, rgba(245, 158, 11, 0.08) 0%, transparent 44%),
+                linear-gradient(180deg, rgba(11, 11, 11, 0.98) 0%, rgba(4, 4, 4, 0.98) 100%);
             border-right: 1px solid var(--border);
             box-shadow: 8px 0 26px rgba(0, 0, 0, 0.28);
             padding: 84px 16px 16px;
@@ -100,56 +108,62 @@
         h1 {
             text-align: center;
             font-family: var(--font-display);
-            letter-spacing: 0.08em;
+            font-weight: 700;
+            letter-spacing: 0.11em;
             text-transform: uppercase;
             font-size: clamp(1.3rem, 2.2vw, 2.1rem);
             margin: 0 0 8px;
-            color: #edf3fc;
-            text-shadow: 0 2px 10px rgba(2, 8, 23, 0.35);
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(16, 10, 6, 0.4);
         }
         #historyBtn {
             position: fixed;
             top: 16px;
             left: 16px;
             z-index: 1000;
-            background: linear-gradient(180deg, #102039 0%, #0a1528 100%);
+            background: linear-gradient(180deg, #1c1c1c 0%, #0c0c0c 100%);
             color: var(--text-main);
             border: 1px solid var(--border);
             padding: 10px 14px;
             border-radius: 8px;
             cursor: pointer;
             min-width: 124px;
+            font-family: var(--font-data);
             font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
             text-align: center;
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
         #historyBtn:hover {
             transform: translateY(-1px);
-            border-color: rgba(96, 165, 250, 0.5);
-            box-shadow: 0 8px 18px rgba(4, 25, 42, 0.34);
+            border-color: rgba(245, 158, 11, 0.5);
+            box-shadow: 0 8px 18px rgba(90, 56, 12, 0.34);
         }
         #demoBtn {
             display: block;
             margin: 0;
             padding: 12px 20px;
-            background: linear-gradient(180deg, #fb923c 0%, #c2410c 100%);
-            border: 1px solid rgba(249, 115, 22, 0.62);
+            background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
+            border: 1px solid rgba(245, 158, 11, 0.62);
             border-radius: 10px;
             color: white;
             cursor: pointer;
+            font-family: var(--font-data);
             font-weight: 700;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
             transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
         #demoBtn:hover {
             transform: translateY(-1px);
             filter: brightness(1.05);
-            box-shadow: 0 10px 20px rgba(194, 65, 12, 0.45);
+            box-shadow: 0 10px 20px rgba(180, 102, 16, 0.45);
         }
         #demoBtn.is-active {
-            background: linear-gradient(180deg, #38bdf8 0%, #2563eb 100%);
-            border-color: rgba(56, 189, 248, 0.56);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+            background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+            border-color: rgba(251, 191, 36, 0.56);
+            box-shadow: 0 10px 20px rgba(217, 119, 6, 0.28);
         }
         .action-row {
             display: flex;
@@ -163,18 +177,20 @@
             margin: 0;
             padding: 12px 18px;
             border-radius: 10px;
-            border: 1px solid rgba(96, 165, 250, 0.58);
-            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+            border: 1px solid rgba(255, 255, 255, 0.58);
+            background: linear-gradient(180deg, #262626 0%, #121212 100%);
             color: #f8fbff;
+            font-family: var(--font-data);
             font-weight: 700;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
         #reportBtn:hover {
             transform: translateY(-1px);
             filter: brightness(1.04);
-            box-shadow: 0 10px 18px rgba(29, 78, 216, 0.32);
+            box-shadow: 0 10px 18px rgba(245, 158, 11, 0.22);
         }
         #reportBtn:disabled {
             opacity: 0.75;
@@ -192,9 +208,9 @@
             position: relative;
             overflow: hidden;
             background:
-                linear-gradient(180deg, rgba(18, 30, 50, 0.9) 0%, rgba(14, 24, 40, 0.94) 100%);
+                linear-gradient(180deg, rgba(22, 22, 22, 0.94) 0%, rgba(10, 10, 10, 0.96) 100%);
             border: 1px solid var(--border);
-            box-shadow: 0 10px 24px rgba(2, 8, 23, 0.24), inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 10px 24px rgba(20, 12, 8, 0.24), inset 0 0 0 1px rgba(245, 158, 11, 0.1);
             border-radius: 14px;
             padding: 20px 22px;
             flex: 1;
@@ -209,32 +225,35 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #38bdf8 0%, #60a5fa 55%, #22c55e 100%);
+            background: linear-gradient(90deg, #f59e0b 0%, #ffffff 55%, #f59e0b 100%);
             opacity: 0.7;
         }
         .status-box:hover {
             transform: translateY(-2px);
-            border-color: rgba(96, 165, 250, 0.38);
-            box-shadow: 0 14px 28px rgba(2, 8, 23, 0.28), inset 0 0 0 1px rgba(59, 130, 246, 0.15);
+            border-color: rgba(245, 158, 11, 0.38);
+            box-shadow: 0 14px 28px rgba(20, 12, 8, 0.28), inset 0 0 0 1px rgba(245, 158, 11, 0.15);
         }
         .status-box h3 {
             margin: 0 0 10px;
         }
         .status-box p {
             margin: 0;
-            padding: 8px 0;
+            padding: 7px 0;
             color: var(--text-muted);
-            font-size: 0.94rem;
+            font-size: 0.9rem;
+            line-height: 1.35;
             display: flex;
             justify-content: space-between;
-            border-bottom: 1px dashed rgba(148, 163, 184, 0.22);
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
         }
         .status-box p:last-child {
             border-bottom: none;
         }
         .status-box strong {
             color: var(--text-main);
+            font-family: var(--font-data);
             font-weight: 600;
+            letter-spacing: 0.015em;
         }
         .sidebar-hidden #mainContent {
             margin-left: 0;
@@ -242,32 +261,39 @@
         .main-status { flex: 2; }
         .system-health { flex: 1; }
 
-        .normal { color: #22c55e; text-shadow: none; }
-        .attack { color: #f97316; text-shadow: none; }
+        .normal { color: #f8fbff; text-shadow: none; }
+        .attack { color: #f59e0b; text-shadow: none; }
         #attack {
             margin: 0 0 8px;
             font-size: clamp(1.35rem, 2.2vw, 2rem);
-            letter-spacing: 0.06em;
+            font-family: var(--font-data);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
         .metric { margin-bottom: 16px; }
         .metric-label {
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 10px;
+            font-family: var(--font-data);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 8px;
             color: var(--text-main);
         }
         .progress-bar {
             width: 100%;
             height: 10px;
-            background: #0b1628;
+            background: #0a0a0a;
             border-radius: 6px;
             overflow: hidden;
         }
         .progress-fill {
             height: 100%;
             width: 0%;
-            background: #22c55e;
+            background: #f8fbff;
             transition: width 0.5s ease, background-color 0.3s ease;
         }
         .grid {
@@ -281,10 +307,10 @@
         .chart-panel {
             position: relative;
             overflow: hidden;
-            background: linear-gradient(180deg, rgba(16, 28, 47, 0.92) 0%, rgba(12, 21, 36, 0.96) 100%);
+            background: linear-gradient(180deg, rgba(20, 20, 20, 0.94) 0%, rgba(8, 8, 8, 0.98) 100%);
             border: 1px solid var(--border);
             border-radius: 14px;
-            box-shadow: 0 10px 24px rgba(2, 8, 23, 0.24);
+            box-shadow: 0 10px 24px rgba(20, 12, 8, 0.24);
             padding: 12px 12px 10px;
             transition: transform 0.2s ease, border-color 0.2s ease;
         }
@@ -295,11 +321,11 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, rgba(56, 189, 248, 0.65), rgba(96, 165, 250, 0.5));
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.7), rgba(255, 255, 255, 0.45));
         }
         .chart-panel:hover {
             transform: translateY(-2px);
-            border-color: rgba(96, 165, 250, 0.4);
+            border-color: rgba(245, 158, 11, 0.4);
         }
         .chart-panel.panel-wide {
             grid-column: span 2;
@@ -315,31 +341,37 @@
             margin: 0;
         }
         .focus-btn {
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            background: rgba(15, 23, 42, 0.86);
-            color: #dce8f8;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(28, 20, 13, 0.86);
+            color: #f8f9fa;
             border-radius: 8px;
             padding: 5px 10px;
-            font-size: 12px;
+            font-family: var(--font-data);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 11px;
             cursor: pointer;
             transition: border-color 0.2s ease, transform 0.2s ease;
         }
         .focus-btn:hover {
             transform: translateY(-1px);
-            border-color: rgba(96, 165, 250, 0.5);
+            border-color: rgba(245, 158, 11, 0.5);
         }
         .focus-btn.active {
-            background: rgba(30, 64, 175, 0.28);
-            border-color: rgba(96, 165, 250, 0.7);
+            background: rgba(245, 158, 11, 0.28);
+            border-color: rgba(245, 158, 11, 0.7);
         }
         #clearFocusBtn {
             display: none;
             margin: -10px auto 10px;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            background: rgba(15, 23, 42, 0.92);
-            color: #e5edf8;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(26, 19, 12, 0.92);
+            color: #f8f9fa;
             border-radius: 9px;
             padding: 8px 14px;
+            font-family: var(--font-data);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             cursor: pointer;
             font-weight: 600;
         }
@@ -362,10 +394,12 @@
         .top-row h3,
         .grid h3 {
             margin: 4px 8px 10px;
+            font-family: var(--font-display);
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: 0.83rem;
-            color: #b3c4d8;
+            letter-spacing: 0.09em;
+            font-weight: 600;
+            font-size: 0.79rem;
+            color: #e9e9e9;
         }
         canvas {
             background: transparent;
@@ -381,13 +415,58 @@ html, body {
 }
 .summary-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 30px;
-    max-width: 1000px;
+    max-width: 1280px;
     margin: 40px auto;
 }
         .summary-grid .status-box p {
             font-size: 0.92rem;
+        }
+        .source-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .source-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 7px 9px;
+            font-family: var(--font-data);
+            font-size: 0.78rem;
+        }
+        .source-ip {
+            color: var(--text-main);
+            overflow-wrap: anywhere;
+        }
+        .source-count {
+            color: #f59e0b;
+            font-weight: 700;
+        }
+        .source-count.is-neutral {
+            color: var(--text-main);
+        }
+        .source-empty {
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 10px 9px;
+            color: var(--text-muted);
+            font-family: var(--font-data);
+            font-size: 0.76rem;
+            text-align: center;
+        }
+        .proto-label {
+            color: var(--text-main);
+            letter-spacing: 0.04em;
+        }
+        .proto-value {
+            color: #f59e0b;
+            font-weight: 700;
         }
         .sidebar-header {
             position: sticky;
@@ -395,20 +474,25 @@ html, body {
             z-index: 2;
             margin: -6px 0 12px;
             padding: 14px;
-            background: rgba(14, 24, 42, 0.84);
+            background: rgba(12, 12, 12, 0.86);
             border: 1px solid var(--border);
             border-radius: 12px;
             backdrop-filter: blur(3px);
         }
         .sidebar-title {
             margin: 0;
-            font-size: 15px;
-            letter-spacing: 0.3px;
+            font-size: 0.96rem;
+            letter-spacing: 0.07em;
             font-family: var(--font-display);
+            font-weight: 600;
+            text-transform: uppercase;
         }
         .sidebar-subtitle {
             margin: 6px 0 0;
-            font-size: 12px;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-family: var(--font-data);
             color: var(--text-muted);
         }
         #log {
@@ -422,17 +506,30 @@ html, body {
             border: 1px solid var(--border);
             padding: 10px;
             border-radius: 10px;
-            font-size: 13px;
-            line-height: 1.35;
+            font-size: 0.8rem;
+            line-height: 1.34;
             transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+        #confidence,
+        #pktSent,
+        #pktRecv,
+        #connLive,
+        #cpuText,
+        #ramText,
+        #netText {
+            font-family: var(--font-data);
+            font-feature-settings: "tnum" 1;
+            font-variant-numeric: tabular-nums;
         }
         .log-entry:hover {
             transform: translateY(-1px);
-            border-color: rgba(96, 165, 250, 0.4);
+            border-color: rgba(245, 158, 11, 0.4);
         }
         .log-meta {
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 11px;
+            font-family: var(--font-data);
+            letter-spacing: 0.03em;
         }
         .log-empty {
             border: 1px dashed var(--border);
@@ -442,9 +539,14 @@ html, body {
             text-align: center;
             padding: 16px 10px;
         }
-        .log-normal { border-left: 4px solid #22c55e; }
-        .log-medium { border-left: 4px solid #ffd247; }
-        .log-high   { border-left: 4px solid #f97316; }
+        .log-normal { border-left: 4px solid #f8fbff; }
+        .log-medium { border-left: 4px solid #f59e0b; }
+        .log-high   { border-left: 4px solid #ef4444; }
+        @media (max-width: 1200px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
         @media (max-width: 900px) {
             #sidebar {
                 width: min(84vw, 320px);
@@ -532,6 +634,24 @@ html, body {
         <p>Packets Recv/sec: <strong id="pktRecv">0</strong></p>
         <p>Connections: <strong id="connLive">0</strong></p>
     </div>
+    <div class="status-box">
+        <h3>Top Source IPs</h3>
+        <div id="topSources" class="source-list">
+            <div class="source-empty">Collecting connection peers...</div>
+        </div>
+    </div>
+    <div class="status-box">
+        <h3>Top Destination Ports</h3>
+        <div id="topPorts" class="source-list">
+            <div class="source-empty">Collecting destination ports...</div>
+        </div>
+    </div>
+    <div class="status-box">
+        <h3>Protocol Distribution</h3>
+        <div id="protocolDist" class="source-list">
+            <div class="source-empty">Collecting protocol usage...</div>
+        </div>
+    </div>
 </div>
         <button id="clearFocusBtn" type="button">Exit Focus</button>
         <div class="grid" id="chartsGrid">
@@ -568,14 +688,15 @@ const THRESHOLDS = {
     connections: { warning: 120, critical: 250 },
     confidence: { warning: 70, critical: 85 }
 };
-const chartTextColor = "#a9bdd5";
-const chartGridColor = "rgba(148, 163, 184, 0.16)";
-const chartBorder = "rgba(96, 165, 250, 0.45)";
+const chartTextColor = "#d9d9d9";
+const chartGridColor = "rgba(255, 255, 255, 0.14)";
+const chartBorder = "rgba(245, 158, 11, 0.45)";
 
 Chart.defaults.color = chartTextColor;
-Chart.defaults.font.family = '"Space Grotesk", sans-serif';
+Chart.defaults.font.family = '"JetBrains Mono", "Consolas", monospace';
+Chart.defaults.font.weight = "500";
 
-const buildChartOptions = () => ({
+const buildChartOptions = (opts = {}) => ({
     responsive: true,
     maintainAspectRatio: false,
     normalized: true,
@@ -591,16 +712,16 @@ const buildChartOptions = () => ({
     plugins: {
         legend: {
             labels: {
-                color: "#cfdef0",
+                color: "#f1f1f1",
                 boxWidth: 12
             }
         },
         tooltip: {
-            backgroundColor: "rgba(11, 20, 34, 0.96)",
+            backgroundColor: "rgba(8, 8, 8, 0.96)",
             borderColor: chartBorder,
             borderWidth: 1,
             titleColor: "#f8fbff",
-            bodyColor: "#d5e3f5",
+            bodyColor: "#f0f0f0",
             intersect: false
         }
     },
@@ -615,11 +736,21 @@ const buildChartOptions = () => ({
             }
         },
         y: {
+            beginAtZero: true,
+            suggestedMax: opts.suggestedMax,
             ticks: {
                 color: chartTextColor
             },
             grid: {
                 color: chartGridColor
+            }
+        },
+        yThreshold: {
+            display: false,
+            min: 0,
+            max: opts.thresholdMax || 100,
+            grid: {
+                drawOnChartArea: false
             }
         }
     }
@@ -633,36 +764,37 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: 'Incoming',
                 data: [],
-                borderColor: "#38bdf8",
-                backgroundColor: "rgba(56, 189, 248, 0.14)",
+                borderColor: "#f59e0b",
+                backgroundColor: "rgba(245, 158, 11, 0.14)",
                 fill: true,
                 pointRadius: 0,
                 pointHitRadius: 16,
                 pointHoverRadius: 5,
                 pointHoverBorderWidth: 2,
                 pointHoverBackgroundColor: "#f8fbff",
-                pointHoverBorderColor: "#38bdf8",
+                pointHoverBorderColor: "#f59e0b",
                 borderWidth: 2,
                 tension: 0.3
             },
             {
                 label: 'Outgoing',
                 data: [],
-                borderColor: "#60a5fa",
-                backgroundColor: "rgba(96, 165, 250, 0.12)",
+                borderColor: "#f8fbff",
+                backgroundColor: "rgba(248, 251, 255, 0.11)",
                 fill: true,
                 pointRadius: 0,
                 pointHitRadius: 16,
                 pointHoverRadius: 5,
                 pointHoverBorderWidth: 2,
                 pointHoverBackgroundColor: "#f8fbff",
-                pointHoverBorderColor: "#60a5fa",
+                pointHoverBorderColor: "#f8fbff",
                 borderWidth: 2,
                 tension: 0.3
             },
             {
                 label: "Warning Threshold",
                 data: [],
+                yAxisID: "yThreshold",
                 borderColor: "#f59e0b",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -673,6 +805,7 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: "Critical Threshold",
                 data: [],
+                yAxisID: "yThreshold",
                 borderColor: "#ef4444",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -682,7 +815,7 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             }
         ]
     },
-    options: buildChartOptions()
+    options: buildChartOptions({ thresholdMax: THRESHOLDS.traffic.critical })
 });
 document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("historyBtn").onclick = () => {
@@ -728,21 +861,22 @@ const connChart = new Chart(document.getElementById('connChart'), {
             {
                 label: 'Connections',
                 data: [],
-                borderColor: "#22c55e",
-                backgroundColor: "rgba(34, 197, 94, 0.12)",
+                borderColor: "#f8fbff",
+                backgroundColor: "rgba(248, 251, 255, 0.11)",
                 fill: true,
                 pointRadius: 0,
                 pointHitRadius: 16,
                 pointHoverRadius: 5,
                 pointHoverBorderWidth: 2,
                 pointHoverBackgroundColor: "#f8fbff",
-                pointHoverBorderColor: "#22c55e",
+                pointHoverBorderColor: "#f8fbff",
                 borderWidth: 2,
                 tension: 0.3
             },
             {
                 label: "Warning Threshold",
                 data: [],
+                yAxisID: "yThreshold",
                 borderColor: "#f59e0b",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -753,6 +887,7 @@ const connChart = new Chart(document.getElementById('connChart'), {
             {
                 label: "Critical Threshold",
                 data: [],
+                yAxisID: "yThreshold",
                 borderColor: "#ef4444",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -762,7 +897,7 @@ const connChart = new Chart(document.getElementById('connChart'), {
             }
         ]
     },
-    options: buildChartOptions()
+    options: buildChartOptions({ thresholdMax: THRESHOLDS.connections.critical })
 });
 setInterval(() => {
     fetch("/health")
@@ -805,6 +940,7 @@ const riskChart = new Chart(document.getElementById('riskChart'), {
             {
                 label: "Warning Threshold",
                 data: [],
+                yAxisID: "yThreshold",
                 borderColor: "#f59e0b",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -815,6 +951,7 @@ const riskChart = new Chart(document.getElementById('riskChart'), {
             {
                 label: "Critical Threshold",
                 data: [],
+                yAxisID: "yThreshold",
                 borderColor: "#ef4444",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -824,7 +961,7 @@ const riskChart = new Chart(document.getElementById('riskChart'), {
             }
         ]
     },
-    options: buildChartOptions()
+    options: buildChartOptions({ thresholdMax: 100, suggestedMax: 100 })
 });
 const chartsGrid = document.getElementById("chartsGrid");
 const clearFocusBtn = document.getElementById("clearFocusBtn");
@@ -874,6 +1011,34 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function updateTopSources(topSourceIps) {
+    const panel = document.getElementById("topSources");
+    if (!Array.isArray(topSourceIps) || topSourceIps.length === 0) {
+        panel.innerHTML = `<div class="source-empty">No remote peers detected yet</div>`;
+        return;
+    }
+
+    panel.innerHTML = topSourceIps.map((entry, index) => {
+        const ip = escapeHtml(entry.ip || "Unknown");
+        const count = Number(entry.connections || 0);
+        return `
+            <div class="source-row">
+                <span class="source-ip">${index + 1}. ${ip}</span>
+                <span class="source-count">${count}</span>
+            </div>
+        `;
+    }).join("");
+}
+
 function updateStatus(data) {
     document.getElementById("attack").innerText = data.attack;
     document.getElementById("risk").innerText = data.risk;
@@ -904,11 +1069,19 @@ function updateCharts(data) {
     trafficChart.data.datasets[1].data.push(data.src_rate);
     trafficChart.data.datasets[2].data = Array(trafficChart.data.labels.length).fill(THRESHOLDS.traffic.warning);
     trafficChart.data.datasets[3].data = Array(trafficChart.data.labels.length).fill(THRESHOLDS.traffic.critical);
+    const trafficLiveMax = Math.max(
+        ...trafficChart.data.datasets[0].data,
+        ...trafficChart.data.datasets[1].data,
+        1
+    );
+    trafficChart.options.scales.y.suggestedMax = Math.max(1000, Math.ceil(trafficLiveMax * 1.25));
 
     connChart.data.labels.push(time);
     connChart.data.datasets[0].data.push(data.connections);
     connChart.data.datasets[1].data = Array(connChart.data.labels.length).fill(THRESHOLDS.connections.warning);
     connChart.data.datasets[2].data = Array(connChart.data.labels.length).fill(THRESHOLDS.connections.critical);
+    const connLiveMax = Math.max(...connChart.data.datasets[0].data, 1);
+    connChart.options.scales.y.suggestedMax = Math.max(25, Math.ceil(connLiveMax * 1.25));
 
     riskChart.data.labels.push(time);
     riskChart.data.datasets[0].data.push(data.confidence);
@@ -944,6 +1117,7 @@ setInterval(() => {
 }
             updateStatus(simulatedData);
 updateCharts(simulatedData);
+updateTopSources(simulatedData.top_source_ips);
 
 // Auto-refresh history ONLY if sidebar is visible
 if (!document.body.classList.contains("sidebar-hidden")) {
@@ -1110,9 +1284,9 @@ function updateBar(barId, textId, value, unit, displayValue = null) {
     const percent = Math.min(Math.max(value, 0), 100);
     bar.style.width = percent + "%";
     if (percent < 60) {
-        bar.style.backgroundColor = "#22c55e";
+        bar.style.backgroundColor = "#f8fbff";
     } else if (percent < 80) {
-        bar.style.backgroundColor = "#ffd247";
+        bar.style.backgroundColor = "#f59e0b";
     } else {
         bar.style.backgroundColor = "#ef4444";
     }

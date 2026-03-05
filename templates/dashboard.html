@@ -198,6 +198,94 @@
             transform: none;
             box-shadow: none;
         }
+        #csvFileInput {
+            margin: 0;
+            padding: 11px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            background: rgba(14, 14, 14, 0.92);
+            color: #f8fbff;
+            font-family: var(--font-data);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #csvFileInput::file-selector-button {
+            margin-right: 10px;
+            border: 1px solid rgba(245, 158, 11, 0.62);
+            background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
+            color: #fff;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-family: var(--font-data);
+            cursor: pointer;
+        }
+        #analyzeCsvBtn {
+            margin: 0;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.58);
+            background: linear-gradient(180deg, #262626 0%, #121212 100%);
+            color: #f8fbff;
+            font-family: var(--font-data);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+        #analyzeCsvBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+            box-shadow: 0 10px 18px rgba(245, 158, 11, 0.22);
+        }
+        #analyzeCsvBtn:disabled {
+            opacity: 0.75;
+            cursor: wait;
+            transform: none;
+            box-shadow: none;
+        }
+        .csv-upload-box {
+            min-height: 100%;
+        }
+        .csv-upload-row {
+            justify-content: flex-start;
+            margin: 8px 0 10px;
+        }
+        .csv-actions-row {
+            justify-content: flex-start;
+            margin: 0 0 10px;
+        }
+        .csv-status {
+            margin: 6px 0 4px;
+            font-family: var(--font-data);
+            font-size: 0.84rem;
+            color: var(--text-main);
+        }
+        .csv-status.is-error {
+            color: #ef4444;
+        }
+        .csv-meta {
+            margin: 0 0 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: var(--font-data);
+        }
+        .csv-preview {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .csv-preview-title {
+            margin: 2px 0 0;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            font-family: var(--font-display);
+        }
+        .csv-preview-title.is-hidden {
+            display: none;
+        }
         .top-row {
             display: flex;
             gap: 30px;
@@ -611,14 +699,6 @@ html, body {
                 </div>
             </div>
         </div>
-<div class="action-row">
-    <button id="demoBtn">
-        Simulate Attack
-    </button>
-    <button id="reportBtn" type="button">
-        Download Report
-    </button>
-</div>
 <div class="summary-grid">
     <div class="status-box">
         <h3>Threat Summary</h3>
@@ -650,6 +730,26 @@ html, body {
         <h3>Protocol Distribution</h3>
         <div id="protocolDist" class="source-list">
             <div class="source-empty">Collecting protocol usage...</div>
+        </div>
+    </div>
+    <div class="status-box csv-upload-box">
+        <h3>CSV Batch Analysis</h3>
+        <div class="action-row csv-actions-row">
+            <button id="demoBtn" type="button">Simulate Attack</button>
+            <button id="reportBtn" type="button">Download Report</button>
+            <button id="analyzeCsvBtn" type="button">Analyze CSV</button>
+        </div>
+        <div class="action-row csv-upload-row">
+            <input id="csvFileInput" type="file" accept=".csv" />
+        </div>
+        <p id="csvStatus" class="csv-status">Upload a CSV to run row-wise attack prediction.</p>
+        <p id="csvMeta" class="csv-meta"></p>
+        <div id="csvBreakdown" class="source-list">
+            <div class="source-empty">No CSV analysis has been run yet.</div>
+        </div>
+        <p id="csvPreviewTitle" class="csv-preview-title is-hidden">Preview</p>
+        <div id="csvPreview" class="csv-preview">
+            <div class="source-empty">CSV preview will appear after file upload.</div>
         </div>
     </div>
 </div>
@@ -1039,6 +1139,46 @@ function updateTopSources(topSourceIps) {
     }).join("");
 }
 
+function updateTopPorts(topDestinationPorts) {
+    const panel = document.getElementById("topPorts");
+    if (!Array.isArray(topDestinationPorts) || topDestinationPorts.length === 0) {
+        panel.innerHTML = `<div class="source-empty">No destination ports detected yet</div>`;
+        return;
+    }
+
+    panel.innerHTML = topDestinationPorts.map((entry, index) => {
+        const port = Number(entry.port);
+        const safePort = Number.isFinite(port) ? port : "Unknown";
+        const count = Number(entry.connections || 0);
+        return `
+            <div class="source-row">
+                <span class="source-ip">${index + 1}. Port ${safePort}</span>
+                <span class="source-count">${count}</span>
+            </div>
+        `;
+    }).join("");
+}
+
+function updateProtocolDistribution(protocolDistribution) {
+    const panel = document.getElementById("protocolDist");
+    if (!Array.isArray(protocolDistribution) || protocolDistribution.length === 0) {
+        panel.innerHTML = `<div class="source-empty">No protocol activity detected yet</div>`;
+        return;
+    }
+
+    panel.innerHTML = protocolDistribution.map((entry) => {
+        const protocol = escapeHtml(entry.protocol || "Unknown");
+        const count = Number(entry.connections || 0);
+        const percentage = Number(entry.percentage || 0);
+        return `
+            <div class="source-row">
+                <span class="proto-label">${protocol}</span>
+                <span class="proto-value">${count} (${percentage.toFixed(1)}%)</span>
+            </div>
+        `;
+    }).join("");
+}
+
 function updateStatus(data) {
     document.getElementById("attack").innerText = data.attack;
     document.getElementById("risk").innerText = data.risk;
@@ -1114,10 +1254,12 @@ setInterval(() => {
     simulatedData.src_rate = data.src_rate + attackIntensity + Math.random() * 100;
     simulatedData.dst_rate = data.dst_rate + attackIntensity + Math.random() * 100;
     simulatedData.connections = data.connections + attackIntensity + Math.random() * 200;
-}
+            }
             updateStatus(simulatedData);
 updateCharts(simulatedData);
 updateTopSources(simulatedData.top_source_ips);
+updateTopPorts(simulatedData.top_destination_ports);
+updateProtocolDistribution(simulatedData.protocol_distribution);
 
 // Auto-refresh history ONLY if sidebar is visible
 if (!document.body.classList.contains("sidebar-hidden")) {
@@ -1147,6 +1289,158 @@ document.getElementById("demoBtn").onclick = () => {
         });
 };
 const reportBtn = document.getElementById("reportBtn");
+const csvFileInput = document.getElementById("csvFileInput");
+const analyzeCsvBtn = document.getElementById("analyzeCsvBtn");
+const csvStatus = document.getElementById("csvStatus");
+const csvMeta = document.getElementById("csvMeta");
+const csvBreakdown = document.getElementById("csvBreakdown");
+const csvPreviewTitle = document.getElementById("csvPreviewTitle");
+const csvPreview = document.getElementById("csvPreview");
+
+function setCsvStatus(message, isError = false) {
+    csvStatus.textContent = message;
+    csvStatus.classList.toggle("is-error", isError);
+}
+
+function renderCsvBreakdown(attackBreakdown) {
+    const entries = Object.entries(attackBreakdown || {})
+        .sort((a, b) => Number(b[1]) - Number(a[1]));
+
+    if (!entries.length) {
+        csvBreakdown.innerHTML = `<div class="source-empty">No predictions returned.</div>`;
+        return;
+    }
+
+    csvBreakdown.innerHTML = entries.map(([attackName, count]) => `
+        <div class="source-row">
+            <span class="source-ip">${escapeHtml(attackName)}</span>
+            <span class="source-count">${Number(count)}</span>
+        </div>
+    `).join("");
+}
+
+function renderCsvPreview(previewRows) {
+    if (!Array.isArray(previewRows) || previewRows.length === 0) {
+        csvPreview.innerHTML = `<div class="source-empty">No preview rows available.</div>`;
+        return;
+    }
+    csvPreviewTitle.classList.remove("is-hidden");
+    csvPreviewTitle.textContent = "Prediction Preview (first 30 rows)";
+
+    csvPreview.innerHTML = previewRows.map((entry) => {
+        const rowNo = Number(entry.row || 0);
+        const prediction = escapeHtml(entry.prediction || "Unknown");
+        const risk = escapeHtml(entry.risk || "LOW");
+        const confidence = Number(entry.confidence || 0).toFixed(2);
+
+        return `
+            <div class="source-row">
+                <span class="source-ip">Row ${rowNo}: ${prediction} (${risk})</span>
+                <span class="source-count">${confidence}%</span>
+            </div>
+        `;
+    }).join("");
+}
+
+function renderSelectedFilePreview(file) {
+    if (!file) {
+        csvPreviewTitle.classList.add("is-hidden");
+        csvPreview.innerHTML = `<div class="source-empty">CSV preview will appear after file upload.</div>`;
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const text = String(reader.result || "");
+        const lines = text
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+
+        if (!lines.length) {
+            csvPreviewTitle.classList.remove("is-hidden");
+            csvPreviewTitle.textContent = "CSV File Preview";
+            csvPreview.innerHTML = `<div class="source-empty">File looks empty.</div>`;
+            return;
+        }
+
+        const previewLines = lines.slice(0, 6);
+        csvPreviewTitle.classList.remove("is-hidden");
+        csvPreviewTitle.textContent = "CSV File Preview (first 6 lines)";
+        csvPreview.innerHTML = previewLines.map((line, index) => `
+            <div class="source-row">
+                <span class="source-ip">${index === 0 ? "Header" : `Row ${index}`}</span>
+                <span class="source-count is-neutral">${escapeHtml(line.slice(0, 110))}</span>
+            </div>
+        `).join("");
+    };
+
+    reader.onerror = () => {
+        csvPreviewTitle.classList.remove("is-hidden");
+        csvPreviewTitle.textContent = "CSV File Preview";
+        csvPreview.innerHTML = `<div class="source-empty">Could not read this file preview.</div>`;
+    };
+
+    reader.readAsText(file.slice(0, 64 * 1024));
+}
+
+async function analyzeCsvUpload() {
+    const file = csvFileInput.files && csvFileInput.files[0];
+    if (!file) {
+        setCsvStatus("Choose a CSV file first.", true);
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const originalText = analyzeCsvBtn.innerText;
+    analyzeCsvBtn.disabled = true;
+    analyzeCsvBtn.innerText = "Analyzing...";
+
+    try {
+        const response = await fetch("/analyze-csv", {
+            method: "POST",
+            body: formData
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload.error || "CSV analysis failed.");
+        }
+
+        setCsvStatus(`Analysis completed for ${payload.rows_processed} rows.`);
+        const inputModeLabel = payload.input_mode === "pc_activity"
+            ? "PC Activity CSV"
+            : "Model Feature CSV";
+        csvMeta.textContent =
+            `Input: ${inputModeLabel} | ` +
+            `High Risk Rows: ${payload.high_risk_rows} | ` +
+            `Missing model columns auto-filled: ${payload.missing_columns.length} | ` +
+            `Extra CSV columns ignored: ${payload.ignored_columns.length}`;
+
+        renderCsvBreakdown(payload.attack_breakdown);
+        renderCsvPreview(payload.preview);
+    } catch (error) {
+        setCsvStatus(error.message || "Could not analyze CSV.", true);
+        csvMeta.textContent = "";
+        csvBreakdown.innerHTML = `<div class="source-empty">No CSV analysis has been run yet.</div>`;
+    } finally {
+        analyzeCsvBtn.disabled = false;
+        analyzeCsvBtn.innerText = originalText;
+    }
+}
+
+analyzeCsvBtn.addEventListener("click", analyzeCsvUpload);
+csvFileInput.addEventListener("change", () => {
+    const file = csvFileInput.files && csvFileInput.files[0];
+    if (file) {
+        setCsvStatus(`Selected file: ${file.name}`);
+    } else {
+        setCsvStatus("Upload a CSV to run row-wise attack prediction.");
+    }
+    renderSelectedFilePreview(file);
+});
 
 function csvEscape(value) {
     const str = value === null || value === undefined ? "" : String(value);

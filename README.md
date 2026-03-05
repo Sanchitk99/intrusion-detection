@@ -23,6 +23,7 @@ The dashboard provides a visual interface for monitoring system health, risk lev
 - Active connection tracking
 - Attack simulation for testing
 - Historical monitoring panel
+- CSV upload for batch attack prediction
 - Modern dark-themed dashboard UI
 
 ---
@@ -57,6 +58,7 @@ Flask-based interface that displays:
 intrusion-detection/
 │
 ├── templates/            # HTML dashboard templates
+├── scripts/              # Local CSV export scripts for end users
 ├── data/                 # Dataset directory
 ├── __pycache__/          # Python cache files
 │
@@ -104,6 +106,55 @@ http://127.0.0.1:5000
 4. Observe risk classification updates
 5. Use "Simulate Fake Attack" to test detection behavior
 6. Toggle "History Panel" to review past predictions
+7. Upload a CSV in "CSV Batch Analysis" to classify each row
+
+---
+
+## Export Activity CSV From PC
+
+You can export a CSV from a Windows PC and upload it to the dashboard.
+
+Run from project root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\export_activity.ps1
+```
+
+Or double-click:
+
+```text
+scripts\run_export_activity.bat
+```
+
+The file is saved to your `Downloads` folder as:
+
+`ids-pc-activity-YYYYMMDD-HHMMSS.csv`
+
+Then upload it in dashboard:
+
+`CSV Batch Analysis` -> choose file -> `Analyze CSV`
+
+---
+
+## Deploy Online (CSV Upload For Everyone)
+
+Yes, you can deploy online so users can upload CSV files.
+
+### Option A: Render (recommended)
+
+1. Push this repository to GitHub
+2. Create a new Web Service in Render and select the repo
+3. Render will use:
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `gunicorn app:app`
+4. Deploy and share the public URL
+
+Deployment files already included:
+
+- `Procfile`
+- `render.yaml`
+
+Note: in cloud deployment, "live" traffic metrics represent the server machine, while CSV analysis works for user-uploaded files.
 
 ---
 

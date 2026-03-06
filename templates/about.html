@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | IDS Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #050505;
+            --bg-panel: #171717;
+            --border: rgba(245, 158, 11, 0.38);
+            --text-main: #f8f9fa;
+            --text-muted: #c6c6c6;
+            --font-body: "Exo 2", "Segoe UI", sans-serif;
+            --font-display: "JetBrains Mono", "Consolas", monospace;
+            --font-data: "JetBrains Mono", "Consolas", monospace;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(245, 158, 11, 0.18), transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.06), transparent 42%),
+                linear-gradient(160deg, #020202 0%, #0a0a0a 45%, #010101 100%);
+            color: var(--text-main);
+            font-family: var(--font-body);
+        }
+        .ids-nav-shell {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 12px 24px 0;
+        }
+        .ids-nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(20, 20, 20, 0.96) 0%, rgba(8, 8, 8, 0.96) 100%);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26), inset 0 0 0 1px rgba(245, 158, 11, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 12px 18px;
+        }
+        .ids-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #f8fbff;
+            text-decoration: none;
+            font-family: var(--font-display);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .ids-brand-dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid rgba(245, 158, 11, 0.68);
+            background: radial-gradient(circle at 30% 30%, #fbbf24 0%, #f59e0b 62%, #b45309 100%);
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.52);
+        }
+        .ids-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ids-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-family: var(--font-data);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 9px 13px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+        }
+        .ids-links a:hover,
+        .ids-links a.is-active {
+            color: #f8fbff;
+            border-color: rgba(245, 158, 11, 0.45);
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.2) 0%, rgba(180, 83, 9, 0.1) 100%);
+        }
+        .content {
+            max-width: 1080px;
+            margin: 26px auto 34px;
+            padding: 0 22px;
+        }
+        .hero {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(22, 22, 22, 0.94) 0%, rgba(10, 10, 10, 0.96) 100%);
+            box-shadow: 0 10px 24px rgba(20, 12, 8, 0.24), inset 0 0 0 1px rgba(245, 158, 11, 0.1);
+            padding: 24px;
+            margin-bottom: 18px;
+        }
+        .hero h1 {
+            margin: 0 0 8px;
+            font-family: var(--font-display);
+            font-size: clamp(1.25rem, 2.2vw, 1.9rem);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .hero p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.98rem;
+        }
+        .readme-panel {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(22, 22, 22, 0.94) 0%, rgba(10, 10, 10, 0.96) 100%);
+            box-shadow: 0 10px 24px rgba(20, 12, 8, 0.24), inset 0 0 0 1px rgba(245, 158, 11, 0.1);
+            padding: 24px;
+        }
+        .readme-content {
+            color: var(--text-main);
+            font-size: 0.98rem;
+            line-height: 1.62;
+        }
+        .readme-content h2,
+        .readme-content h3,
+        .readme-content h4 {
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 24px 0 10px;
+            color: #ffffff;
+        }
+        .readme-content h2 {
+            font-size: 1.08rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.24);
+            padding-bottom: 6px;
+        }
+        .readme-content h3 {
+            font-size: 0.95rem;
+        }
+        .readme-content p {
+            margin: 0 0 12px;
+            color: var(--text-muted);
+        }
+        .readme-content ul,
+        .readme-content ol {
+            margin: 0 0 14px 20px;
+            padding: 0;
+            color: var(--text-muted);
+        }
+        .readme-content li {
+            margin-bottom: 6px;
+        }
+        .readme-content code {
+            font-family: var(--font-data);
+            font-size: 0.9em;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            padding: 1px 6px;
+            color: #f8fbff;
+        }
+        .readme-content .readme-code {
+            margin: 0 0 14px;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(9, 9, 9, 0.94);
+            overflow-x: auto;
+        }
+        .readme-content .readme-code code {
+            display: block;
+            white-space: pre;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+        .readme-content hr {
+            border: none;
+            border-top: 1px dashed rgba(255, 255, 255, 0.22);
+            margin: 16px 0;
+        }
+        @media (max-width: 900px) {
+            .ids-nav-shell {
+                padding: 10px 12px 0;
+            }
+            .ids-nav {
+                border-radius: 16px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .ids-brand {
+                width: 100%;
+                justify-content: center;
+            }
+            .content {
+                padding: 0 12px;
+            }
+            .hero,
+            .readme-panel {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="ids-nav-shell">
+    <nav class="ids-nav" aria-label="About Navigation">
+        <a href="/" class="ids-brand">
+            <span class="ids-brand-dot" aria-hidden="true"></span>
+            IDS Command
+        </a>
+        <div class="ids-links">
+            <a href="/">Dashboard</a>
+            <a href="/about" class="is-active">About</a>
+        </div>
+    </nav>
+</div>
+
+<main class="content">
+    <section class="hero">
+        <h1>About This IDS Project</h1>
+        <p>This page is generated from your project README so users can understand architecture, usage, and workflow directly inside the app.</p>
+    </section>
+
+    <section class="readme-panel">
+        <article class="readme-content">
+            {{ readme_html | safe }}
+        </article>
+    </section>
+</main>
+</body>
+</html>

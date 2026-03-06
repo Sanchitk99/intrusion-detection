@@ -80,7 +80,7 @@ intrusion-detection/
 ## Installation
 
 Clone the repository:
-```bash
+```bash 
 git clone https://github.com/Sanchitk99/intrusion-detection.git
 cd intrusion-detection
 ```

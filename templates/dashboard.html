@@ -7,6 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
         :root {
             --bg-main: #050505;
             --bg-panel-soft: #0f0f0f;
@@ -42,6 +45,107 @@
             background-attachment: fixed;
             color: white;
         }
+        .ids-nav-shell {
+            position: sticky;
+            top: 0;
+            z-index: 1200;
+            padding: 12px 24px 0;
+        }
+        .ids-nav {
+            max-width: 1600px;
+            margin: 0 auto;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background:
+                linear-gradient(180deg, rgba(20, 20, 20, 0.96) 0%, rgba(8, 8, 8, 0.96) 100%);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26), inset 0 0 0 1px rgba(245, 158, 11, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 12px 18px;
+            backdrop-filter: blur(10px);
+        }
+        .ids-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #f8fbff;
+            text-decoration: none;
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .ids-brand-dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid rgba(245, 158, 11, 0.68);
+            background: radial-gradient(circle at 30% 30%, #fbbf24 0%, #f59e0b 62%, #b45309 100%);
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.52);
+        }
+        .ids-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .ids-nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-family: var(--font-data);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 9px 13px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+            white-space: nowrap;
+        }
+        .ids-nav-links a:hover,
+        .ids-nav-links a.is-active {
+            color: #f8fbff;
+            border-color: rgba(245, 158, 11, 0.45);
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.2) 0%, rgba(180, 83, 9, 0.1) 100%);
+        }
+        .ids-nav-cta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ids-nav-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.56);
+            background: linear-gradient(180deg, #262626 0%, #121212 100%);
+            color: #f8fbff;
+            padding: 10px 16px;
+            font-family: var(--font-data);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            white-space: nowrap;
+        }
+        .ids-nav-chip:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+            box-shadow: 0 10px 18px rgba(245, 158, 11, 0.22);
+        }
+        .ids-nav-chip.ids-nav-chip-primary {
+            border-color: rgba(245, 158, 11, 0.62);
+            background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
+            color: #fff;
+        }
         body::before {
             content: "";
             position: fixed;
@@ -70,7 +174,14 @@
             animation: driftGlow 22s ease-in-out infinite alternate;
         }
         body.risk-high {
-            --alert-tint: rgba(153, 27, 27, 0.12);
+            --alert-tint: rgba(153, 27, 27, 0.32);
+        }
+        body.risk-high::after {
+            background:
+                radial-gradient(circle at 20% 30%, rgba(220, 38, 38, 0.25), transparent 36%),
+                radial-gradient(circle at 78% 26%, rgba(248, 113, 113, 0.18), transparent 34%),
+                radial-gradient(circle at 55% 78%, rgba(153, 27, 27, 0.22), transparent 40%);
+            filter: blur(30px);
         }
         #appLayout {
             display: flex;
@@ -115,30 +226,6 @@
             margin: 0 0 8px;
             color: #ffffff;
             text-shadow: 0 2px 10px rgba(16, 10, 6, 0.4);
-        }
-        #historyBtn {
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            z-index: 1000;
-            background: linear-gradient(180deg, #1c1c1c 0%, #0c0c0c 100%);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 10px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            min-width: 124px;
-            font-family: var(--font-data);
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            text-align: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-        #historyBtn:hover {
-            transform: translateY(-1px);
-            border-color: rgba(245, 158, 11, 0.5);
-            box-shadow: 0 8px 18px rgba(90, 56, 12, 0.34);
         }
         #demoBtn {
             display: block;
@@ -198,6 +285,31 @@
             transform: none;
             box-shadow: none;
         }
+        #downloadScriptBtn {
+            margin: 0;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.58);
+            background: linear-gradient(180deg, #262626 0%, #121212 100%);
+            color: #f8fbff;
+            font-family: var(--font-data);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+        #downloadScriptBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+            box-shadow: 0 10px 18px rgba(245, 158, 11, 0.22);
+        }
+        #downloadScriptBtn:disabled {
+            opacity: 0.75;
+            cursor: wait;
+            transform: none;
+            box-shadow: none;
+        }
         #csvFileInput {
             margin: 0;
             padding: 11px 12px;
@@ -246,51 +358,216 @@
         }
         .csv-upload-box {
             min-height: 100%;
+            grid-column: 1 / -1;
+            padding: 24px;
+        }
+        .csv-upload-head {
+            margin-bottom: 14px;
+        }
+        .csv-upload-head h3 {
+            margin: 0;
+            font-size: 1.02rem;
+            letter-spacing: 0.05em;
+        }
+        .csv-upload-subtitle {
+            margin: 6px 0 0;
+            color: var(--text-muted);
+            font-family: var(--font-data);
+            font-size: 0.76rem;
+            letter-spacing: 0.03em;
         }
         .csv-upload-row {
             justify-content: flex-start;
-            margin: 8px 0 10px;
+            margin: 0 0 12px;
         }
         .csv-actions-row {
-            justify-content: flex-start;
-            margin: 0 0 10px;
+            margin: 0 0 12px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .csv-actions-tools {
+            margin-bottom: 10px;
+        }
+        .csv-actions-row button {
+            width: 100%;
+            font-size: 0.82rem;
+            letter-spacing: 0.035em;
+        }
+        .csv-actions-row #reportBtn,
+        .csv-actions-row #downloadScriptBtn,
+        .csv-actions-row #analyzeCsvBtn {
+            text-transform: none;
+        }
+        .csv-script-note {
+            margin: 0 0 12px;
+            padding: 9px 10px;
+            border: 1px dashed rgba(245, 158, 11, 0.4);
+            border-radius: 10px;
+            background: rgba(245, 158, 11, 0.06);
+            color: var(--text-muted);
+            font-family: var(--font-data);
+            font-size: 0.74rem;
+            line-height: 1.45;
+        }
+        .csv-script-note strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+        .csv-script-note code {
+            color: #f8fbff;
+            font-family: var(--font-data);
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            padding: 1px 4px;
+        }
+        .summary-actions-card .summary-actions-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 0;
+        }
+        .summary-actions-card .summary-actions-row button {
+            width: 100%;
         }
         .csv-status {
-            margin: 6px 0 4px;
+            margin: 0 0 10px;
             font-family: var(--font-data);
-            font-size: 0.84rem;
+            font-size: 0.8rem;
             color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 10px;
         }
         .csv-status.is-error {
             color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.34);
+            background: rgba(239, 68, 68, 0.08);
         }
         .csv-meta {
-            margin: 0 0 10px;
-            font-size: 0.78rem;
+            margin: 0 0 14px;
+        }
+        .csv-kpis {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .csv-kpi {
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 9px;
+        }
+        .csv-kpi span {
+            display: block;
             color: var(--text-muted);
             font-family: var(--font-data);
+            font-size: 0.68rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .csv-kpi strong {
+            color: var(--text-main);
+            font-family: var(--font-data);
+            font-size: 0.83rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+        .csv-results-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.35fr);
+            gap: 14px;
+            align-items: start;
+        }
+        .csv-section {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(25, 25, 25, 0.78) 0%, rgba(10, 10, 10, 0.78) 100%);
+            padding: 12px;
+        }
+        .csv-section h4 {
+            margin: 0 0 10px;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-weight: 600;
         }
         .csv-preview {
             display: grid;
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 0;
         }
         .csv-preview-title {
-            margin: 2px 0 0;
+            margin: 0 0 10px;
             font-size: 0.72rem;
             text-transform: uppercase;
             letter-spacing: 0.06em;
             color: var(--text-muted);
             font-family: var(--font-display);
+            font-weight: 600;
         }
         .csv-preview-title.is-hidden {
             display: none;
+        }
+        .csv-upload-box .source-list {
+            margin-top: 0;
+            gap: 8px;
+        }
+        .csv-upload-box .source-row {
+            border-color: rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 0.77rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .csv-upload-box .source-ip {
+            letter-spacing: 0.01em;
+        }
+        .csv-upload-box .source-count {
+            color: #fbbf24;
+        }
+        .csv-risk-chip {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 2px 7px;
+            margin-left: 6px;
+            font-size: 0.65rem;
+            font-family: var(--font-data);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+        }
+        .csv-risk-chip.low {
+            color: #f8fbff;
+            border-color: rgba(248, 251, 255, 0.34);
+        }
+        .csv-risk-chip.medium {
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.45);
+        }
+        .csv-risk-chip.high {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.55);
         }
         .top-row {
             display: flex;
             gap: 30px;
             max-width: 1400px;
-            margin: 40px auto;
+            margin: 34px auto 40px;
+        }
+        #overviewSection,
+        #healthSection,
+        #threatIntelSection,
+        #quickActionsSection,
+        #csvBatchSection,
+        #chartsGrid,
+        #sidebar {
+            scroll-margin-top: 112px;
         }
         .status-box {
             position: relative;
@@ -351,6 +628,18 @@
 
         .normal { color: #f8fbff; text-shadow: none; }
         .attack { color: #f59e0b; text-shadow: none; }
+        .attack.attack-critical {
+            color: #ef4444;
+            text-shadow: 0 0 14px rgba(239, 68, 68, 0.62);
+            animation: attackPulse 1.2s ease-in-out infinite;
+        }
+        .main-status.is-critical {
+            border-color: rgba(239, 68, 68, 0.7);
+            box-shadow: 0 14px 28px rgba(90, 16, 16, 0.44), inset 0 0 0 1px rgba(239, 68, 68, 0.25);
+        }
+        .main-status.is-critical::before {
+            background: linear-gradient(90deg, #ef4444 0%, #fca5a5 50%, #ef4444 100%);
+        }
         #attack {
             margin: 0 0 8px;
             font-size: clamp(1.35rem, 2.2vw, 2rem);
@@ -506,7 +795,7 @@ html, body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 30px;
     max-width: 1280px;
-    margin: 40px auto;
+    margin: 40px auto 62px;
 }
         .summary-grid .status-box p {
             font-size: 0.92rem;
@@ -631,11 +920,50 @@ html, body {
         .log-medium { border-left: 4px solid #f59e0b; }
         .log-high   { border-left: 4px solid #ef4444; }
         @media (max-width: 1200px) {
+            .ids-nav {
+                border-radius: 20px;
+                padding: 12px;
+            }
+            .ids-nav-links {
+                gap: 6px;
+            }
+            .ids-nav-links a {
+                font-size: 0.72rem;
+                padding: 8px 11px;
+            }
             .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .csv-kpis {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
         @media (max-width: 900px) {
+            .ids-nav-shell {
+                padding: 10px 12px 0;
+            }
+            .ids-nav {
+                border-radius: 16px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            .ids-brand {
+                width: 100%;
+                justify-content: center;
+            }
+            .ids-nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+            .ids-nav-cta {
+                width: 100%;
+                justify-content: center;
+            }
+            .ids-nav-chip {
+                flex: 1;
+                min-width: 140px;
+            }
             #sidebar {
                 width: min(84vw, 320px);
             }
@@ -653,16 +981,53 @@ html, body {
             .chart-panel.panel-wide {
                 grid-column: auto;
             }
+            .csv-actions-row {
+                grid-template-columns: 1fr;
+            }
+            .csv-results-grid {
+                grid-template-columns: 1fr;
+            }
+            .csv-upload-box {
+                padding: 18px;
+            }
+            .csv-kpis {
+                grid-template-columns: 1fr;
+            }
         }
         @keyframes driftGlow {
             0% { transform: translate3d(-2%, -1%, 0) scale(1); }
             100% { transform: translate3d(2%, 1%, 0) scale(1.05); }
         }
+        @keyframes attackPulse {
+            0% { opacity: 1; transform: translateZ(0); }
+            50% { opacity: 0.75; transform: translateY(-1px); }
+            100% { opacity: 1; transform: translateZ(0); }
+        }
         
     </style>
 </head>
-<body>
-<button id="historyBtn">Hide History</button>
+<body id="dashboardTop" class="sidebar-hidden">
+<div class="ids-nav-shell">
+    <nav class="ids-nav" aria-label="IDS Navigation">
+        <a href="#dashboardTop" class="ids-brand">
+            <span class="ids-brand-dot" aria-hidden="true"></span>
+            IDS Command
+        </a>
+        <div class="ids-nav-links">
+            <a href="#overviewSection" class="is-active">Overview</a>
+            <a href="/about">About</a>
+            <a href="#healthSection">Health</a>
+            <a href="#threatIntelSection">Threat Intel</a>
+            <a href="#chartsGrid">Live Charts</a>
+            <a href="#csvBatchSection">CSV Analysis</a>
+            <a href="#" id="historyNavBtn">Hide History</a>
+        </div>
+        <div class="ids-nav-cta">
+            <a href="#quickActionsSection" class="ids-nav-chip ids-nav-chip-primary">Quick Actions</a>
+            <a href="#csvBatchSection" class="ids-nav-chip">Batch Analyze</a>
+        </div>
+    </nav>
+</div>
 <div id="appLayout">
     <aside id="sidebar">
         <div class="sidebar-header">
@@ -673,14 +1038,14 @@ html, body {
     </aside>
     <main id="mainContent">
         <h1>Intrusion Detection System</h1>
-        <div class="top-row">
+        <div class="top-row" id="overviewSection">
             <div class="status-box main-status">
                 <h2 id="attack" class="normal">NORMAL</h2>
                 <p>Risk Level: <strong id="risk">LOW</strong></p>
                 <p>Confidence: <strong id="confidence">0%</strong></p>
             </div>
 
-            <div class="status-box system-health">
+            <div class="status-box system-health" id="healthSection">
                 <h3>System Health</h3>
 
                 <div class="metric">
@@ -699,7 +1064,7 @@ html, body {
                 </div>
             </div>
         </div>
-<div class="summary-grid">
+<div class="summary-grid" id="threatIntelSection">
     <div class="status-box">
         <h3>Threat Summary</h3>
         <p>Mode: <strong id="mode">LIVE</strong></p>
@@ -732,24 +1097,44 @@ html, body {
             <div class="source-empty">Collecting protocol usage...</div>
         </div>
     </div>
-    <div class="status-box csv-upload-box">
-        <h3>CSV Batch Analysis</h3>
-        <div class="action-row csv-actions-row">
+    <div class="status-box summary-actions-card" id="quickActionsSection">
+        <h3>Quick Actions</h3>
+        <div class="summary-actions-row">
             <button id="demoBtn" type="button">Simulate Attack</button>
             <button id="reportBtn" type="button">Download Report</button>
-            <button id="analyzeCsvBtn" type="button">Analyze CSV</button>
         </div>
+    </div>
+    <div class="status-box csv-upload-box" id="csvBatchSection">
+        <div class="csv-upload-head">
+            <h3>CSV Batch Analysis</h3>
+            <p class="csv-upload-subtitle">Upload PC activity CSV or model-feature CSV for row-wise prediction.</p>
+        </div>
+        <div class="action-row csv-actions-row csv-actions-tools">
+            <button id="downloadScriptBtn" type="button">Download Script</button>
+            <button id="analyzeCsvBtn" type="button">Run Analysis</button>
+        </div>
+        <p class="csv-script-note">
+            <strong>Download Script</strong> runs locally on the user's PC, collects local TCP/UDP connection activity,
+            and generates an <strong><code>ids-pc-activity-*.csv</code></strong> file in Downloads. It does not send data externally.
+        </p>
         <div class="action-row csv-upload-row">
             <input id="csvFileInput" type="file" accept=".csv" />
         </div>
         <p id="csvStatus" class="csv-status">Upload a CSV to run row-wise attack prediction.</p>
-        <p id="csvMeta" class="csv-meta"></p>
-        <div id="csvBreakdown" class="source-list">
-            <div class="source-empty">No CSV analysis has been run yet.</div>
-        </div>
-        <p id="csvPreviewTitle" class="csv-preview-title is-hidden">Preview</p>
-        <div id="csvPreview" class="csv-preview">
-            <div class="source-empty">CSV preview will appear after file upload.</div>
+        <div id="csvMeta" class="csv-meta"></div>
+        <div class="csv-results-grid">
+            <div class="csv-section">
+                <h4>Attack Breakdown</h4>
+                <div id="csvBreakdown" class="source-list">
+                    <div class="source-empty">No CSV analysis has been run yet.</div>
+                </div>
+            </div>
+            <div class="csv-section">
+                <p id="csvPreviewTitle" class="csv-preview-title is-hidden">Preview</p>
+                <div id="csvPreview" class="csv-preview">
+                    <div class="source-empty">CSV preview will appear after file upload.</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -783,6 +1168,7 @@ html, body {
 <script>
 const maxPoints = 15;
 let attackIntensity = 0;
+let trafficAxisMax = 0;
 const THRESHOLDS = {
     traffic: { warning: 500000, critical: 1500000 },
     connections: { warning: 120, critical: 250 },
@@ -791,10 +1177,62 @@ const THRESHOLDS = {
 const chartTextColor = "#d9d9d9";
 const chartGridColor = "rgba(255, 255, 255, 0.14)";
 const chartBorder = "rgba(245, 158, 11, 0.45)";
+const integerFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
 Chart.defaults.color = chartTextColor;
 Chart.defaults.font.family = '"JetBrains Mono", "Consolas", monospace';
 Chart.defaults.font.weight = "500";
+
+function toNumber(value, fallback = 0) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : fallback;
+}
+
+function formatCompactNumber(value, precision = 1) {
+    const numeric = toNumber(value, 0);
+    const absValue = Math.abs(numeric);
+    const sign = numeric < 0 ? "-" : "";
+
+    if (absValue >= 1e9) {
+        return `${sign}${(absValue / 1e9).toFixed(precision).replace(/\.0$/, "")}B`;
+    }
+    if (absValue >= 1e6) {
+        return `${sign}${(absValue / 1e6).toFixed(precision).replace(/\.0$/, "")}M`;
+    }
+    if (absValue >= 1e3) {
+        return `${sign}${(absValue / 1e3).toFixed(precision).replace(/\.0$/, "")}k`;
+    }
+    return `${sign}${integerFormatter.format(Math.round(absValue))}`;
+}
+
+function formatCount(value) {
+    return integerFormatter.format(Math.round(Math.max(0, toNumber(value, 0))));
+}
+
+function formatConfidencePercent(value) {
+    const numeric = toNumber(value, 0);
+    const rounded = Math.round(numeric * 10) / 10;
+    const display = Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1);
+    return `${display}%`;
+}
+
+function updateTrafficAxisMax(currentPeak, criticalThreshold) {
+    const minTarget = Math.max(criticalThreshold * 1.15, 10);
+    const target = Math.max(currentPeak * 1.2, minTarget);
+
+    if (!Number.isFinite(trafficAxisMax) || trafficAxisMax <= 0) {
+        trafficAxisMax = target;
+        return trafficAxisMax;
+    }
+
+    if (target > trafficAxisMax) {
+        trafficAxisMax = Math.max(target, trafficAxisMax * 1.16);
+    } else {
+        trafficAxisMax = Math.max(target, trafficAxisMax * 0.76);
+    }
+
+    return trafficAxisMax;
+}
 
 const buildChartOptions = (opts = {}) => ({
     responsive: true,
@@ -829,7 +1267,8 @@ const buildChartOptions = (opts = {}) => ({
         x: {
             ticks: {
                 color: chartTextColor,
-                maxRotation: 0
+                maxRotation: 0,
+                callback: opts.xTickFormatter || undefined
             },
             grid: {
                 color: chartGridColor
@@ -839,7 +1278,8 @@ const buildChartOptions = (opts = {}) => ({
             beginAtZero: true,
             suggestedMax: opts.suggestedMax,
             ticks: {
-                color: chartTextColor
+                color: chartTextColor,
+                callback: opts.yTickFormatter || undefined
             },
             grid: {
                 color: chartGridColor
@@ -894,7 +1334,6 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: "Warning Threshold",
                 data: [],
-                yAxisID: "yThreshold",
                 borderColor: "#f59e0b",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -905,7 +1344,6 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: "Critical Threshold",
                 data: [],
-                yAxisID: "yThreshold",
                 borderColor: "#ef4444",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -915,18 +1353,30 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             }
         ]
     },
-    options: buildChartOptions({ thresholdMax: THRESHOLDS.traffic.critical })
+    options: buildChartOptions({
+        thresholdMax: THRESHOLDS.traffic.critical,
+        yTickFormatter: (value) => formatCompactNumber(value, 1)
+    })
 });
 document.addEventListener("DOMContentLoaded", () => {
-document.getElementById("historyBtn").onclick = () => {
-    document.body.classList.toggle("sidebar-hidden");
+const historyNavBtn = document.getElementById("historyNavBtn");
 
+function syncHistoryNavLabel() {
     const isHidden = document.body.classList.contains("sidebar-hidden");
+    if (historyNavBtn) {
+        historyNavBtn.innerText = isHidden ? "Show History" : "Hide History";
+    }
+}
 
-    document.getElementById("historyBtn").innerText =
-        isHidden ? "Show History" : "Hide History";
+if (historyNavBtn) {
+    historyNavBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        document.body.classList.toggle("sidebar-hidden");
+        syncHistoryNavLabel();
+    });
+}
 
-};
+syncHistoryNavLabel();
 window.updateHistory = function () {
     fetch("/history")
         .then(res => res.json())
@@ -946,7 +1396,7 @@ window.updateHistory = function () {
                 logDiv.innerHTML += `
                     <div class="log-entry ${cls}">
                         <strong>${item.attack}</strong><br>
-                        <span class="log-meta">${item.time} | ${item.confidence}%</span>
+                        <span class="log-meta">${item.time} | ${formatConfidencePercent(item.confidence)}</span>
                     </div>
                 `;
             });
@@ -997,7 +1447,10 @@ const connChart = new Chart(document.getElementById('connChart'), {
             }
         ]
     },
-    options: buildChartOptions({ thresholdMax: THRESHOLDS.connections.critical })
+    options: buildChartOptions({
+        thresholdMax: THRESHOLDS.connections.critical,
+        yTickFormatter: (value) => formatCompactNumber(value, 1)
+    })
 });
 setInterval(() => {
     fetch("/health")
@@ -1061,7 +1514,11 @@ const riskChart = new Chart(document.getElementById('riskChart'), {
             }
         ]
     },
-    options: buildChartOptions({ thresholdMax: 100, suggestedMax: 100 })
+    options: buildChartOptions({
+        thresholdMax: 100,
+        suggestedMax: 100,
+        yTickFormatter: (value) => `${Math.round(toNumber(value, 0))}%`
+    })
 });
 const chartsGrid = document.getElementById("chartsGrid");
 const clearFocusBtn = document.getElementById("clearFocusBtn");
@@ -1129,7 +1586,7 @@ function updateTopSources(topSourceIps) {
 
     panel.innerHTML = topSourceIps.map((entry, index) => {
         const ip = escapeHtml(entry.ip || "Unknown");
-        const count = Number(entry.connections || 0);
+        const count = formatCount(entry.connections || 0);
         return `
             <div class="source-row">
                 <span class="source-ip">${index + 1}. ${ip}</span>
@@ -1149,7 +1606,7 @@ function updateTopPorts(topDestinationPorts) {
     panel.innerHTML = topDestinationPorts.map((entry, index) => {
         const port = Number(entry.port);
         const safePort = Number.isFinite(port) ? port : "Unknown";
-        const count = Number(entry.connections || 0);
+        const count = formatCount(entry.connections || 0);
         return `
             <div class="source-row">
                 <span class="source-ip">${index + 1}. Port ${safePort}</span>
@@ -1168,7 +1625,7 @@ function updateProtocolDistribution(protocolDistribution) {
 
     panel.innerHTML = protocolDistribution.map((entry) => {
         const protocol = escapeHtml(entry.protocol || "Unknown");
-        const count = Number(entry.connections || 0);
+        const count = formatCount(entry.connections || 0);
         const percentage = Number(entry.percentage || 0);
         return `
             <div class="source-row">
@@ -1180,18 +1637,28 @@ function updateProtocolDistribution(protocolDistribution) {
 }
 
 function updateStatus(data) {
-    document.getElementById("attack").innerText = data.attack;
+    const attackElement = document.getElementById("attack");
+    const mainStatusCard = document.querySelector(".main-status");
+    attackElement.innerText = data.attack;
     document.getElementById("risk").innerText = data.risk;
-    document.getElementById("confidence").innerText = data.confidence + "%";
+    document.getElementById("confidence").innerText = formatConfidencePercent(data.confidence);
 
     document.getElementById("lastAttack").innerText = data.attack;
     document.getElementById("riskSummary").innerText = data.risk;
     document.getElementById("updatedTime").innerText =
         new Date().toLocaleTimeString();
 
-    document.getElementById("attack").className =
-        data.attack === "Normal" ? "normal" : "attack";
-    document.body.classList.toggle("risk-high", data.risk === "HIGH");
+    const confidenceValue = Number(data.confidence) || 0;
+    const criticalConfidence = Number(THRESHOLDS.confidence.critical || 85);
+    const isCritical = confidenceValue >= criticalConfidence;
+
+    attackElement.className = data.attack === "Normal" ? "normal" : "attack";
+    attackElement.classList.toggle("attack-critical", isCritical);
+    if (mainStatusCard) {
+        mainStatusCard.classList.toggle("is-critical", isCritical);
+    }
+
+    document.body.classList.toggle("risk-high", isCritical);
 }
 function updateCharts(data) {
     const time = new Date().toLocaleTimeString();
@@ -1204,33 +1671,94 @@ function updateCharts(data) {
         riskChart.data.labels.shift();
         riskChart.data.datasets[0].data.shift();
     }
+
+    const trafficIncoming = Math.max(1, toNumber(data.dst_rate, 0));
+    const trafficOutgoing = Math.max(1, toNumber(data.src_rate, 0));
+    const trafficWarning = Math.max(1, toNumber(THRESHOLDS.traffic.warning, 1));
+    const trafficCritical = Math.max(trafficWarning, toNumber(THRESHOLDS.traffic.critical, trafficWarning));
+    const trafficPeak = Math.max(trafficIncoming, trafficOutgoing, trafficCritical, 1);
+    const trafficAxisTarget = updateTrafficAxisMax(trafficPeak, trafficCritical);
+    const useLogScale = (trafficAxisTarget / trafficCritical) >= 18;
+
     trafficChart.data.labels.push(time);
-    trafficChart.data.datasets[0].data.push(data.dst_rate);
-    trafficChart.data.datasets[1].data.push(data.src_rate);
-    trafficChart.data.datasets[2].data = Array(trafficChart.data.labels.length).fill(THRESHOLDS.traffic.warning);
-    trafficChart.data.datasets[3].data = Array(trafficChart.data.labels.length).fill(THRESHOLDS.traffic.critical);
-    const trafficLiveMax = Math.max(
-        ...trafficChart.data.datasets[0].data,
-        ...trafficChart.data.datasets[1].data,
-        1
-    );
-    trafficChart.options.scales.y.suggestedMax = Math.max(1000, Math.ceil(trafficLiveMax * 1.25));
+    trafficChart.data.datasets[0].data.push(trafficIncoming);
+    trafficChart.data.datasets[1].data.push(trafficOutgoing);
+    trafficChart.data.datasets[2].data = Array(trafficChart.data.labels.length).fill(trafficWarning);
+    trafficChart.data.datasets[3].data = Array(trafficChart.data.labels.length).fill(trafficCritical);
+
+    trafficChart.options.scales.y.type = useLogScale ? "logarithmic" : "linear";
+    trafficChart.options.scales.y.min = useLogScale ? 1 : 0;
+    trafficChart.options.scales.y.max = useLogScale
+        ? Math.pow(10, Math.ceil(Math.log10(Math.max(trafficAxisTarget, trafficCritical))))
+        : Math.ceil(Math.max(trafficAxisTarget, trafficCritical * 1.2));
+    trafficChart.options.scales.y.suggestedMax = undefined;
 
     connChart.data.labels.push(time);
-    connChart.data.datasets[0].data.push(data.connections);
+    connChart.data.datasets[0].data.push(Math.max(1, toNumber(data.connections, 0)));
     connChart.data.datasets[1].data = Array(connChart.data.labels.length).fill(THRESHOLDS.connections.warning);
     connChart.data.datasets[2].data = Array(connChart.data.labels.length).fill(THRESHOLDS.connections.critical);
     const connLiveMax = Math.max(...connChart.data.datasets[0].data, 1);
     connChart.options.scales.y.suggestedMax = Math.max(25, Math.ceil(connLiveMax * 1.25));
 
     riskChart.data.labels.push(time);
-    riskChart.data.datasets[0].data.push(data.confidence);
+    riskChart.data.datasets[0].data.push(toNumber(data.confidence, 0));
     riskChart.data.datasets[1].data = Array(riskChart.data.labels.length).fill(THRESHOLDS.confidence.warning);
     riskChart.data.datasets[2].data = Array(riskChart.data.labels.length).fill(THRESHOLDS.confidence.critical);
     trafficChart.update();
     connChart.update();
     riskChart.update();
     
+}
+
+function buildDemoTopSourceIps(baseSources, simulatedConnections) {
+    const fallbackIps = ["198.51.100.10", "203.0.113.42", "192.0.2.88", "198.51.100.77", "203.0.113.19"];
+    const sourceList = Array.isArray(baseSources) ? baseSources : [];
+    const baseCount = Math.max(250, Math.round(toNumber(simulatedConnections, 0)));
+    const weights = [0.34, 0.25, 0.18, 0.13, 0.1];
+
+    return weights.map((weight, index) => {
+        const fallbackIp = fallbackIps[index % fallbackIps.length];
+        const entry = sourceList[index] || sourceList[index % Math.max(sourceList.length, 1)] || {};
+        return {
+            ip: entry.ip || fallbackIp,
+            connections: Math.max(1, Math.round(baseCount * weight))
+        };
+    });
+}
+
+function buildDemoTopDestinationPorts(basePorts, simulatedConnections) {
+    const fallbackPorts = [443, 80, 53, 22, 3389];
+    const portList = Array.isArray(basePorts) ? basePorts : [];
+    const baseCount = Math.max(300, Math.round(toNumber(simulatedConnections, 0)));
+    const weights = [0.29, 0.24, 0.2, 0.16, 0.11];
+
+    return weights.map((weight, index) => {
+        const fallbackPort = fallbackPorts[index % fallbackPorts.length];
+        const entry = portList[index] || portList[index % Math.max(portList.length, 1)] || {};
+        const resolvedPort = Number.isFinite(Number(entry.port)) ? Number(entry.port) : fallbackPort;
+        return {
+            port: resolvedPort,
+            connections: Math.max(1, Math.round(baseCount * weight))
+        };
+    });
+}
+
+function buildDemoProtocolDistribution(simulatedConnections) {
+    const baseCount = Math.max(500, Math.round(toNumber(simulatedConnections, 0)));
+    const distributions = [
+        { protocol: "udp", weight: 0.58 },
+        { protocol: "tcp", weight: 0.34 },
+        { protocol: "icmp", weight: 0.08 }
+    ];
+
+    return distributions.map((entry) => {
+        const connections = Math.max(1, Math.round(baseCount * entry.weight));
+        return {
+            protocol: entry.protocol,
+            connections,
+            percentage: (entry.weight * 100)
+        };
+    });
 }
 
 setInterval(() => {
@@ -1244,16 +1772,30 @@ setInterval(() => {
 
             if (demoEnabled) {
 
-    attackIntensity += 80;
-    if (attackIntensity > 1200) attackIntensity = 1200;
+    attackIntensity += 1;
+    if (attackIntensity > 12) attackIntensity = 12;
+
+    const baseOutgoing = Math.max(1, toNumber(data.src_rate, 0));
+    const baseIncoming = Math.max(1, toNumber(data.dst_rate, 0));
+    const intensityFactor = 1 + (attackIntensity * 0.62);
+    const minTrafficFloor = THRESHOLDS.traffic.critical * (1.8 + attackIntensity * 0.42);
+    const inboundBurst = 1.05 + Math.random() * 0.32;
+    const outboundBurst = 0.95 + Math.random() * 0.28;
+    const connectionFloor = THRESHOLDS.connections.critical * (2.2 + attackIntensity * 0.35);
 
     simulatedData.attack = "DDoS Attack";
     simulatedData.risk = "HIGH";
-    simulatedData.confidence = Math.min(85 + attackIntensity / 30, 99);
-
-    simulatedData.src_rate = data.src_rate + attackIntensity + Math.random() * 100;
-    simulatedData.dst_rate = data.dst_rate + attackIntensity + Math.random() * 100;
-    simulatedData.connections = data.connections + attackIntensity + Math.random() * 200;
+    simulatedData.confidence = Math.min(87 + attackIntensity * 0.95 + Math.random() * 1.4, 99);
+    simulatedData.src_rate = Math.max(baseOutgoing * intensityFactor * outboundBurst, minTrafficFloor * 0.9);
+    simulatedData.dst_rate = Math.max(baseIncoming * intensityFactor * inboundBurst, minTrafficFloor * 1.12);
+    simulatedData.connections = Math.max(
+        Math.max(1, toNumber(data.connections, 0)) * (1.4 + attackIntensity * 0.36) + Math.random() * 180,
+        connectionFloor + Math.random() * 160
+    );
+    const demoConnections = Math.max(1, Math.round(toNumber(simulatedData.connections, 0)));
+    simulatedData.top_source_ips = buildDemoTopSourceIps(data.top_source_ips, demoConnections * 20);
+    simulatedData.top_destination_ports = buildDemoTopDestinationPorts(data.top_destination_ports, demoConnections * 30);
+    simulatedData.protocol_distribution = buildDemoProtocolDistribution(demoConnections * 35);
             }
             updateStatus(simulatedData);
 updateCharts(simulatedData);
@@ -1265,9 +1807,9 @@ updateProtocolDistribution(simulatedData.protocol_distribution);
 if (!document.body.classList.contains("sidebar-hidden")) {
     updateHistory();
 }
-            document.getElementById("pktSent").innerText = simulatedData.src_rate;
-            document.getElementById("pktRecv").innerText = simulatedData.dst_rate;
-            document.getElementById("connLive").innerText = simulatedData.connections;
+            document.getElementById("pktSent").innerText = formatCompactNumber(simulatedData.src_rate, 1);
+            document.getElementById("pktRecv").innerText = formatCompactNumber(simulatedData.dst_rate, 1);
+            document.getElementById("connLive").innerText = formatCount(simulatedData.connections);
         });
 }, 3000);
 let demoEnabled = false;
@@ -1283,12 +1825,15 @@ document.getElementById("demoBtn").onclick = () => {
                 btn.innerText = "Stop Attack Simulation";
                 btn.classList.add("is-active");
             } else {
+                attackIntensity = 0;
+                trafficAxisMax = Math.max(THRESHOLDS.traffic.critical * 1.2, 10);
                 btn.innerText = "Simulate Attack";
                 btn.classList.remove("is-active");
             }
         });
 };
 const reportBtn = document.getElementById("reportBtn");
+const downloadScriptBtn = document.getElementById("downloadScriptBtn");
 const csvFileInput = document.getElementById("csvFileInput");
 const analyzeCsvBtn = document.getElementById("analyzeCsvBtn");
 const csvStatus = document.getElementById("csvStatus");
@@ -1302,6 +1847,34 @@ function setCsvStatus(message, isError = false) {
     csvStatus.classList.toggle("is-error", isError);
 }
 
+function renderCsvMeta(summary = null) {
+    if (!summary) {
+        csvMeta.innerHTML = "";
+        return;
+    }
+
+    csvMeta.innerHTML = `
+        <div class="csv-kpis">
+            <div class="csv-kpi">
+                <span>Input</span>
+                <strong>${escapeHtml(summary.inputMode)}</strong>
+            </div>
+            <div class="csv-kpi">
+                <span>Rows</span>
+                <strong>${Number(summary.rowsProcessed)}</strong>
+            </div>
+            <div class="csv-kpi">
+                <span>High Risk</span>
+                <strong>${Number(summary.highRiskRows)}</strong>
+            </div>
+            <div class="csv-kpi">
+                <span>Data Gaps</span>
+                <strong>${Number(summary.missingColumns)} missing / ${Number(summary.ignoredColumns)} extra</strong>
+            </div>
+        </div>
+    `;
+}
+
 function renderCsvBreakdown(attackBreakdown) {
     const entries = Object.entries(attackBreakdown || {})
         .sort((a, b) => Number(b[1]) - Number(a[1]));
@@ -1311,12 +1884,21 @@ function renderCsvBreakdown(attackBreakdown) {
         return;
     }
 
+    const total = entries.reduce((sum, entry) => sum + Number(entry[1] || 0), 0);
+
     csvBreakdown.innerHTML = entries.map(([attackName, count]) => `
         <div class="source-row">
             <span class="source-ip">${escapeHtml(attackName)}</span>
-            <span class="source-count">${Number(count)}</span>
+            <span class="source-count">${Number(count)} <span class="source-count is-neutral">(${((Number(count) / Math.max(total, 1)) * 100).toFixed(1)}%)</span></span>
         </div>
     `).join("");
+}
+
+function riskChipClass(riskValue) {
+    const risk = String(riskValue || "").trim().toUpperCase();
+    if (risk === "HIGH") return "high";
+    if (risk === "MEDIUM") return "medium";
+    return "low";
 }
 
 function renderCsvPreview(previewRows) {
@@ -1325,7 +1907,7 @@ function renderCsvPreview(previewRows) {
         return;
     }
     csvPreviewTitle.classList.remove("is-hidden");
-    csvPreviewTitle.textContent = "Prediction Preview (first 30 rows)";
+    csvPreviewTitle.textContent = "Prediction Sample (top 30 rows)";
 
     csvPreview.innerHTML = previewRows.map((entry) => {
         const rowNo = Number(entry.row || 0);
@@ -1335,7 +1917,7 @@ function renderCsvPreview(previewRows) {
 
         return `
             <div class="source-row">
-                <span class="source-ip">Row ${rowNo}: ${prediction} (${risk})</span>
+                <span class="source-ip">Row ${rowNo}: ${prediction}<span class="csv-risk-chip ${riskChipClass(risk)}">${risk}</span></span>
                 <span class="source-count">${confidence}%</span>
             </div>
         `;
@@ -1366,11 +1948,11 @@ function renderSelectedFilePreview(file) {
 
         const previewLines = lines.slice(0, 6);
         csvPreviewTitle.classList.remove("is-hidden");
-        csvPreviewTitle.textContent = "CSV File Preview (first 6 lines)";
+        csvPreviewTitle.textContent = "Incoming File Snapshot (first 6 lines)";
         csvPreview.innerHTML = previewLines.map((line, index) => `
             <div class="source-row">
-                <span class="source-ip">${index === 0 ? "Header" : `Row ${index}`}</span>
-                <span class="source-count is-neutral">${escapeHtml(line.slice(0, 110))}</span>
+                <span class="source-ip">${index === 0 ? "Header" : `Sample ${index}`}</span>
+                <span class="source-count is-neutral">${escapeHtml(line.slice(0, 120))}</span>
             </div>
         `).join("");
     };
@@ -1409,22 +1991,26 @@ async function analyzeCsvUpload() {
             throw new Error(payload.error || "CSV analysis failed.");
         }
 
-        setCsvStatus(`Analysis completed for ${payload.rows_processed} rows.`);
+        setCsvStatus(`Complete: ${payload.rows_processed} rows scored.`);
         const inputModeLabel = payload.input_mode === "pc_activity"
             ? "PC Activity CSV"
             : "Model Feature CSV";
-        csvMeta.textContent =
-            `Input: ${inputModeLabel} | ` +
-            `High Risk Rows: ${payload.high_risk_rows} | ` +
-            `Missing model columns auto-filled: ${payload.missing_columns.length} | ` +
-            `Extra CSV columns ignored: ${payload.ignored_columns.length}`;
+        renderCsvMeta({
+            inputMode: inputModeLabel,
+            rowsProcessed: payload.rows_processed,
+            highRiskRows: payload.high_risk_rows,
+            missingColumns: payload.missing_columns.length,
+            ignoredColumns: payload.ignored_columns.length
+        });
 
         renderCsvBreakdown(payload.attack_breakdown);
         renderCsvPreview(payload.preview);
     } catch (error) {
         setCsvStatus(error.message || "Could not analyze CSV.", true);
-        csvMeta.textContent = "";
+        renderCsvMeta(null);
         csvBreakdown.innerHTML = `<div class="source-empty">No CSV analysis has been run yet.</div>`;
+        csvPreviewTitle.classList.add("is-hidden");
+        csvPreview.innerHTML = `<div class="source-empty">CSV preview will appear after file upload.</div>`;
     } finally {
         analyzeCsvBtn.disabled = false;
         analyzeCsvBtn.innerText = originalText;
@@ -1439,6 +2025,8 @@ csvFileInput.addEventListener("change", () => {
     } else {
         setCsvStatus("Upload a CSV to run row-wise attack prediction.");
     }
+    renderCsvMeta(null);
+    csvBreakdown.innerHTML = `<div class="source-empty">Run analysis to view attack distribution.</div>`;
     renderSelectedFilePreview(file);
 });
 
@@ -1460,6 +2048,36 @@ function downloadCsv(content, fileName) {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+}
+
+async function downloadLogScript() {
+    const originalText = downloadScriptBtn.innerText;
+    downloadScriptBtn.disabled = true;
+    downloadScriptBtn.innerText = "Preparing...";
+
+    try {
+        const response = await fetch("/download-log-script");
+        if (!response.ok) {
+            throw new Error("Download failed.");
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "run_export_activity.bat";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        setCsvStatus("Launcher downloaded. Double-click it, then upload the generated CSV.");
+    } catch (error) {
+        setCsvStatus("Could not download script right now.", true);
+    } finally {
+        downloadScriptBtn.disabled = false;
+        downloadScriptBtn.innerText = originalText;
+    }
 }
 
 async function downloadReport() {
@@ -1570,6 +2188,7 @@ async function downloadReport() {
 }
 
 reportBtn.addEventListener("click", downloadReport);
+downloadScriptBtn.addEventListener("click", downloadLogScript);
 
 function updateBar(barId, textId, value, unit, displayValue = null) {
     const bar = document.getElementById(barId);

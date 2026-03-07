@@ -117,75 +117,48 @@
             color: var(--text-muted);
             font-size: 0.98rem;
         }
-        .readme-panel {
+        .hero p + p {
+            margin-top: 8px;
+        }
+        .about-sections {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .about-card {
             border: 1px solid var(--border);
             border-radius: 16px;
             background: linear-gradient(180deg, rgba(22, 22, 22, 0.94) 0%, rgba(10, 10, 10, 0.96) 100%);
             box-shadow: 0 10px 24px rgba(20, 12, 8, 0.24), inset 0 0 0 1px rgba(245, 158, 11, 0.1);
-            padding: 24px;
+            padding: 20px;
         }
-        .readme-content {
-            color: var(--text-main);
-            font-size: 0.98rem;
-            line-height: 1.62;
-        }
-        .readme-content h2,
-        .readme-content h3,
-        .readme-content h4 {
+        .about-card h2 {
+            margin: 0 0 10px;
             font-family: var(--font-display);
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            margin: 24px 0 10px;
+            font-size: 0.95rem;
             color: #ffffff;
         }
-        .readme-content h2 {
-            font-size: 1.08rem;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.24);
-            padding-bottom: 6px;
-        }
-        .readme-content h3 {
-            font-size: 0.95rem;
-        }
-        .readme-content p {
-            margin: 0 0 12px;
+        .about-card p {
+            margin: 0;
+            line-height: 1.6;
             color: var(--text-muted);
         }
-        .readme-content ul,
-        .readme-content ol {
-            margin: 0 0 14px 20px;
-            padding: 0;
+        .about-card p + p {
+            margin-top: 10px;
+        }
+        .about-card ul {
+            margin: 0;
+            padding-left: 18px;
             color: var(--text-muted);
+            line-height: 1.6;
         }
-        .readme-content li {
-            margin-bottom: 6px;
+        .about-card li + li {
+            margin-top: 6px;
         }
-        .readme-content code {
-            font-family: var(--font-data);
-            font-size: 0.9em;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
-            padding: 1px 6px;
-            color: #f8fbff;
-        }
-        .readme-content .readme-code {
-            margin: 0 0 14px;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(9, 9, 9, 0.94);
-            overflow-x: auto;
-        }
-        .readme-content .readme-code code {
-            display: block;
-            white-space: pre;
-            background: transparent;
-            padding: 0;
-            border-radius: 0;
-        }
-        .readme-content hr {
-            border: none;
-            border-top: 1px dashed rgba(255, 255, 255, 0.22);
-            margin: 16px 0;
+        .about-card--wide {
+            grid-column: 1 / -1;
         }
         @media (max-width: 900px) {
             .ids-nav-shell {
@@ -204,8 +177,11 @@
                 padding: 0 12px;
             }
             .hero,
-            .readme-panel {
+            .about-card {
                 padding: 16px;
+            }
+            .about-sections {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -226,13 +202,32 @@
 
 <main class="content">
     <section class="hero">
-        <h1>About This IDS Project</h1>
-        <p>This page is generated from your project README so users can understand architecture, usage, and workflow directly inside the app.</p>
+        <h1>About</h1>
+        <p>I built this IDS dashboard to make security data easier to understand and act on.</p>
+        <p>Instead of digging through scattered logs, you can see live behavior, model output, and risk level together in one place.</p>
     </section>
 
-    <section class="readme-panel">
-        <article class="readme-content">
-            {{ readme_html | safe }}
+    <section class="about-sections">
+        <article class="about-card">
+            <h2>What This Dashboard Does</h2>
+            <p>It monitors incoming metrics, evaluates activity with a trained model, and reports whether behavior looks normal or suspicious.</p>
+            <p>The interface is designed to show useful signals first: attack type, confidence, and risk status.</p>
+        </article>
+
+        <article class="about-card">
+            <h2>Why I Built It</h2>
+            <p>Most IDS demos look impressive but are hard to use day to day. I wanted something practical, understandable, and easy to test.</p>
+            <p>This project is my way of connecting machine learning with real security workflows, not just model accuracy numbers.</p>
+        </article>
+
+        <article class="about-card about-card--wide">
+            <h2>How You Can Use It</h2>
+            <ul>
+                <li>Watch live detection behavior and system health in real time.</li>
+                <li>Run simulated attacks to verify alerts and confidence changes.</li>
+                <li>Upload CSV activity data to analyze larger samples quickly.</li>
+                <li>Use it as a base for your own IDS experiments and improvements.</li>
+            </ul>
         </article>
     </section>
 </main>

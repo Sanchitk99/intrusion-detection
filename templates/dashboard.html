@@ -252,6 +252,12 @@
             border-color: rgba(251, 191, 36, 0.56);
             box-shadow: 0 10px 20px rgba(217, 119, 6, 0.28);
         }
+        #demoBtn:disabled {
+            opacity: 0.72;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         .action-row {
             display: flex;
             align-items: center;
@@ -284,6 +290,28 @@
             cursor: wait;
             transform: none;
             box-shadow: none;
+        }
+        #backToLiveBtn {
+            margin: 0;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.58);
+            background: linear-gradient(180deg, #262626 0%, #121212 100%);
+            color: #f8fbff;
+            font-family: var(--font-data);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+        #backToLiveBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+            box-shadow: 0 10px 18px rgba(245, 158, 11, 0.22);
+        }
+        #backToLiveBtn[hidden] {
+            display: none;
         }
         #downloadScriptBtn {
             margin: 0;
@@ -357,8 +385,8 @@
             box-shadow: none;
         }
         .csv-upload-box {
-            min-height: 100%;
-            grid-column: 1 / -1;
+            min-height: 0;
+            grid-column: auto;
             padding: 24px;
         }
         .csv-upload-head {
@@ -568,6 +596,12 @@
         #chartsGrid,
         #sidebar {
             scroll-margin-top: 112px;
+        }
+        #csvBatchSection {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            box-sizing: border-box;
         }
         .status-box {
             position: relative;
@@ -1031,8 +1065,8 @@ html, body {
 <div id="appLayout">
     <aside id="sidebar">
         <div class="sidebar-header">
-            <h2 class="sidebar-title">Attack History</h2>
-            <p class="sidebar-subtitle">Latest 10 detection events</p>
+            <h2 class="sidebar-title" id="historyTitle">Attack History</h2>
+            <p class="sidebar-subtitle" id="historySubtitle">Latest 10 detection events</p>
         </div>
         <div id="log"></div>
     </aside>
@@ -1046,20 +1080,20 @@ html, body {
             </div>
 
             <div class="status-box system-health" id="healthSection">
-                <h3>System Health</h3>
+                <h3 id="healthHeading">System Health</h3>
 
                 <div class="metric">
-                    <div class="metric-label">CPU <span id="cpuText">0%</span></div>
+                    <div class="metric-label"><span id="metricOneLabel">CPU</span> <span id="cpuText">0%</span></div>
                     <div class="progress-bar"><div id="cpuBar" class="progress-fill"></div></div>
                 </div>
 
                 <div class="metric">
-                    <div class="metric-label">Memory <span id="ramText">0%</span></div>
+                    <div class="metric-label"><span id="metricTwoLabel">Memory</span> <span id="ramText">0%</span></div>
                     <div class="progress-bar"><div id="ramBar" class="progress-fill"></div></div>
                 </div>
 
                 <div class="metric">
-                    <div class="metric-label">Network <span id="netText">0 MB</span></div>
+                    <div class="metric-label"><span id="metricThreeLabel">Network</span> <span id="netText">0 MB</span></div>
                     <div class="progress-bar"><div id="netBar" class="progress-fill"></div></div>
                 </div>
             </div>
@@ -1074,25 +1108,25 @@ html, body {
     </div>
 
     <div class="status-box">
-        <h3>Live Packet Counter</h3>
-        <p>Packets Sent/sec: <strong id="pktSent">0</strong></p>
-        <p>Packets Recv/sec: <strong id="pktRecv">0</strong></p>
-        <p>Connections: <strong id="connLive">0</strong></p>
+        <h3 id="counterHeading">Live Packet Counter</h3>
+        <p><span id="counterOneLabel">Packets Sent/sec</span>: <strong id="pktSent">0</strong></p>
+        <p><span id="counterTwoLabel">Packets Recv/sec</span>: <strong id="pktRecv">0</strong></p>
+        <p><span id="counterThreeLabel">Connections</span>: <strong id="connLive">0</strong></p>
     </div>
     <div class="status-box">
-        <h3>Top Source IPs</h3>
+        <h3 id="topSourcesTitle">Top Source IPs</h3>
         <div id="topSources" class="source-list">
             <div class="source-empty">Collecting connection peers...</div>
         </div>
     </div>
     <div class="status-box">
-        <h3>Top Destination Ports</h3>
+        <h3 id="topPortsTitle">Top Destination Ports</h3>
         <div id="topPorts" class="source-list">
             <div class="source-empty">Collecting destination ports...</div>
         </div>
     </div>
     <div class="status-box">
-        <h3>Protocol Distribution</h3>
+        <h3 id="protocolTitle">Protocol Distribution</h3>
         <div id="protocolDist" class="source-list">
             <div class="source-empty">Collecting protocol usage...</div>
         </div>
@@ -1102,39 +1136,7 @@ html, body {
         <div class="summary-actions-row">
             <button id="demoBtn" type="button">Simulate Attack</button>
             <button id="reportBtn" type="button">Download Report</button>
-        </div>
-    </div>
-    <div class="status-box csv-upload-box" id="csvBatchSection">
-        <div class="csv-upload-head">
-            <h3>CSV Batch Analysis</h3>
-            <p class="csv-upload-subtitle">Upload PC activity CSV or model-feature CSV for row-wise prediction.</p>
-        </div>
-        <div class="action-row csv-actions-row csv-actions-tools">
-            <button id="downloadScriptBtn" type="button">Download Script</button>
-            <button id="analyzeCsvBtn" type="button">Run Analysis</button>
-        </div>
-        <p class="csv-script-note">
-            <strong>Download Script</strong> runs locally on the user's PC, collects local TCP/UDP connection activity,
-            and generates an <strong><code>ids-pc-activity-*.csv</code></strong> file in Downloads. It does not send data externally.
-        </p>
-        <div class="action-row csv-upload-row">
-            <input id="csvFileInput" type="file" accept=".csv" />
-        </div>
-        <p id="csvStatus" class="csv-status">Upload a CSV to run row-wise attack prediction.</p>
-        <div id="csvMeta" class="csv-meta"></div>
-        <div class="csv-results-grid">
-            <div class="csv-section">
-                <h4>Attack Breakdown</h4>
-                <div id="csvBreakdown" class="source-list">
-                    <div class="source-empty">No CSV analysis has been run yet.</div>
-                </div>
-            </div>
-            <div class="csv-section">
-                <p id="csvPreviewTitle" class="csv-preview-title is-hidden">Preview</p>
-                <div id="csvPreview" class="csv-preview">
-                    <div class="source-empty">CSV preview will appear after file upload.</div>
-                </div>
-            </div>
+            <button id="backToLiveBtn" type="button" hidden>Back to Live PC</button>
         </div>
     </div>
 </div>
@@ -1142,24 +1144,62 @@ html, body {
         <div class="grid" id="chartsGrid">
             <div class="chart-panel" data-panel="traffic">
                 <div class="chart-head">
-                    <h3>Traffic Rate</h3>
+                    <h3 id="trafficChartTitle">Traffic Rate</h3>
                     <button class="focus-btn" type="button" data-focus="traffic">Focus</button>
                 </div>
                 <canvas id="trafficChart"></canvas>
             </div>
             <div class="chart-panel" data-panel="connections">
                 <div class="chart-head">
-                    <h3>Active Connections</h3>
+                    <h3 id="connectionsChartTitle">Active Connections</h3>
                     <button class="focus-btn" type="button" data-focus="connections">Focus</button>
                 </div>
                 <canvas id="connChart"></canvas>
             </div>
             <div class="chart-panel panel-wide" data-panel="confidence">
                 <div class="chart-head">
-                    <h3>Risk Confidence</h3>
+                    <h3 id="riskChartTitle">Risk Confidence</h3>
                     <button class="focus-btn" type="button" data-focus="confidence">Focus</button>
                 </div>
                 <canvas id="riskChart"></canvas>
+            </div>
+        </div>
+        <div class="status-box csv-upload-box" id="csvBatchSection">
+            <div class="csv-upload-head">
+                <h3>CSV Batch Analysis</h3>
+                <p class="csv-upload-subtitle">Generate a CSV activity report from this PC, then upload that report here to analyze each recorded connection for possible attacks.</p>
+            </div>
+            <div class="action-row csv-actions-row csv-actions-tools">
+                <button id="downloadScriptBtn" type="button">Download Report Script</button>
+                <button id="analyzeCsvBtn" type="button">Run Analysis</button>
+            </div>
+            <div class="csv-script-note">
+                <strong>What Download Report Script does:</strong> It creates a CSV activity report named <code>ids-pc-activity-*.csv</code> in your Downloads folder.
+                <br>
+                <strong>What is in the report:</strong> A snapshot of current TCP connections and UDP endpoints, including timestamp, protocol, local/remote address, local/remote port, connection state, and owning process ID.
+                <br>
+                <strong>How to use it:</strong> Download the script, run it on the PC you want to inspect, then upload the generated report here and click <strong>Run Analysis</strong>. The script does not upload anything by itself.
+                <br>
+                <strong>Windows security prompt:</strong> You may see a warning that shows a path like <code>C:\Users\YourName\Downloads\Activity_Generator.bat</code>. Don't worry, that path is just the local Downloads folder on the user's own PC.
+            </div>
+            <div class="action-row csv-upload-row">
+                <input id="csvFileInput" type="file" accept=".csv" />
+            </div>
+            <p id="csvStatus" class="csv-status">Upload a CSV to run row-wise attack prediction.</p>
+            <div id="csvMeta" class="csv-meta"></div>
+            <div class="csv-results-grid">
+                <div class="csv-section">
+                    <h4>Attack Breakdown</h4>
+                    <div id="csvBreakdown" class="source-list">
+                        <div class="source-empty">No CSV analysis has been run yet.</div>
+                    </div>
+                </div>
+                <div class="csv-section">
+                    <p id="csvPreviewTitle" class="csv-preview-title is-hidden">Preview</p>
+                    <div id="csvPreview" class="csv-preview">
+                        <div class="source-empty">CSV preview will appear after file upload.</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1168,7 +1208,6 @@ html, body {
 <script>
 const maxPoints = 15;
 let attackIntensity = 0;
-let trafficAxisMax = 0;
 const THRESHOLDS = {
     traffic: { warning: 500000, critical: 1500000 },
     connections: { warning: 120, critical: 250 },
@@ -1216,22 +1255,10 @@ function formatConfidencePercent(value) {
     return `${display}%`;
 }
 
-function updateTrafficAxisMax(currentPeak, criticalThreshold) {
-    const minTarget = Math.max(criticalThreshold * 1.15, 10);
-    const target = Math.max(currentPeak * 1.2, minTarget);
-
-    if (!Number.isFinite(trafficAxisMax) || trafficAxisMax <= 0) {
-        trafficAxisMax = target;
-        return trafficAxisMax;
-    }
-
-    if (target > trafficAxisMax) {
-        trafficAxisMax = Math.max(target, trafficAxisMax * 1.16);
-    } else {
-        trafficAxisMax = Math.max(target, trafficAxisMax * 0.76);
-    }
-
-    return trafficAxisMax;
+function updateTrafficAxisMax(currentValues, criticalThreshold) {
+    const values = Array.isArray(currentValues) ? currentValues : [currentValues];
+    const recentPeak = Math.max(...values.map((value) => Math.max(1, toNumber(value, 0))), 1);
+    return Math.max(recentPeak * 1.2, 10);
 }
 
 const buildChartOptions = (opts = {}) => ({
@@ -1334,6 +1361,7 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: "Warning Threshold",
                 data: [],
+                yAxisID: "yThreshold",
                 borderColor: "#f59e0b",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -1344,6 +1372,7 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: "Critical Threshold",
                 data: [],
+                yAxisID: "yThreshold",
                 borderColor: "#ef4444",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -1378,28 +1407,15 @@ if (historyNavBtn) {
 
 syncHistoryNavLabel();
 window.updateHistory = function () {
+    if (dashboardMode === "csv" && csvDashboardState) {
+        renderHistoryEntries((csvDashboardState.dashboard && csvDashboardState.dashboard.history) || [], "No CSV findings yet");
+        return;
+    }
+
     fetch("/history")
         .then(res => res.json())
         .then(logs => {
-            const logDiv = document.getElementById("log");
-            logDiv.innerHTML = "";
-            if (!logs.length) {
-                logDiv.innerHTML = `<div class="log-empty">No events yet</div>`;
-                return;
-            }
-
-            logs.slice().reverse().forEach(item => {
-                let cls = "log-normal";
-                if (item.risk === "HIGH") cls = "log-high";
-                else if (item.risk === "MEDIUM") cls = "log-medium";
-
-                logDiv.innerHTML += `
-                    <div class="log-entry ${cls}">
-                        <strong>${item.attack}</strong><br>
-                        <span class="log-meta">${item.time} | ${formatConfidencePercent(item.confidence)}</span>
-                    </div>
-                `;
-            });
+            renderHistoryEntries(logs.slice().reverse(), "No events yet");
         });
 };
 });
@@ -1453,6 +1469,10 @@ const connChart = new Chart(document.getElementById('connChart'), {
     })
 });
 setInterval(() => {
+    if (dashboardMode === "csv") {
+        return;
+    }
+
     fetch("/health")
         .then(res => res.json())
         .then(data => {
@@ -1580,7 +1600,7 @@ function escapeHtml(value) {
 function updateTopSources(topSourceIps) {
     const panel = document.getElementById("topSources");
     if (!Array.isArray(topSourceIps) || topSourceIps.length === 0) {
-        panel.innerHTML = `<div class="source-empty">No remote peers detected yet</div>`;
+        panel.innerHTML = `<div class="source-empty">${dashboardMode === "csv" ? "No source address data is available in this CSV" : "No remote peers detected yet"}</div>`;
         return;
     }
 
@@ -1599,7 +1619,7 @@ function updateTopSources(topSourceIps) {
 function updateTopPorts(topDestinationPorts) {
     const panel = document.getElementById("topPorts");
     if (!Array.isArray(topDestinationPorts) || topDestinationPorts.length === 0) {
-        panel.innerHTML = `<div class="source-empty">No destination ports detected yet</div>`;
+        panel.innerHTML = `<div class="source-empty">${dashboardMode === "csv" ? "No port data is available in this CSV" : "No destination ports detected yet"}</div>`;
         return;
     }
 
@@ -1619,7 +1639,7 @@ function updateTopPorts(topDestinationPorts) {
 function updateProtocolDistribution(protocolDistribution) {
     const panel = document.getElementById("protocolDist");
     if (!Array.isArray(protocolDistribution) || protocolDistribution.length === 0) {
-        panel.innerHTML = `<div class="source-empty">No protocol activity detected yet</div>`;
+        panel.innerHTML = `<div class="source-empty">${dashboardMode === "csv" ? "No protocol data is available in this CSV" : "No protocol activity detected yet"}</div>`;
         return;
     }
 
@@ -1676,22 +1696,23 @@ function updateCharts(data) {
     const trafficOutgoing = Math.max(1, toNumber(data.src_rate, 0));
     const trafficWarning = Math.max(1, toNumber(THRESHOLDS.traffic.warning, 1));
     const trafficCritical = Math.max(trafficWarning, toNumber(THRESHOLDS.traffic.critical, trafficWarning));
-    const trafficPeak = Math.max(trafficIncoming, trafficOutgoing, trafficCritical, 1);
-    const trafficAxisTarget = updateTrafficAxisMax(trafficPeak, trafficCritical);
-    const useLogScale = (trafficAxisTarget / trafficCritical) >= 18;
-
+    const trafficAxisTarget = updateTrafficAxisMax([
+        ...trafficChart.data.datasets[0].data,
+        ...trafficChart.data.datasets[1].data,
+        trafficIncoming,
+        trafficOutgoing
+    ], trafficCritical);
     trafficChart.data.labels.push(time);
     trafficChart.data.datasets[0].data.push(trafficIncoming);
     trafficChart.data.datasets[1].data.push(trafficOutgoing);
     trafficChart.data.datasets[2].data = Array(trafficChart.data.labels.length).fill(trafficWarning);
     trafficChart.data.datasets[3].data = Array(trafficChart.data.labels.length).fill(trafficCritical);
 
-    trafficChart.options.scales.y.type = useLogScale ? "logarithmic" : "linear";
-    trafficChart.options.scales.y.min = useLogScale ? 1 : 0;
-    trafficChart.options.scales.y.max = useLogScale
-        ? Math.pow(10, Math.ceil(Math.log10(Math.max(trafficAxisTarget, trafficCritical))))
-        : Math.ceil(Math.max(trafficAxisTarget, trafficCritical * 1.2));
+    trafficChart.options.scales.y.type = "linear";
+    trafficChart.options.scales.y.min = 0;
+    trafficChart.options.scales.y.max = Math.ceil(Math.max(trafficAxisTarget, 10));
     trafficChart.options.scales.y.suggestedMax = undefined;
+    trafficChart.options.scales.yThreshold.max = Math.max(trafficCritical, trafficWarning * 1.2);
 
     connChart.data.labels.push(time);
     connChart.data.datasets[0].data.push(Math.max(1, toNumber(data.connections, 0)));
@@ -1762,6 +1783,10 @@ function buildDemoProtocolDistribution(simulatedConnections) {
 }
 
 setInterval(() => {
+    if (dashboardMode === "csv") {
+        return;
+    }
+
     
     fetch("/metrics")
         .then(res => res.json())
@@ -1813,23 +1838,17 @@ if (!document.body.classList.contains("sidebar-hidden")) {
         });
 }, 3000);
 let demoEnabled = false;
-document.getElementById("demoBtn").onclick = () => {
+const demoBtn = document.getElementById("demoBtn");
+demoBtn.onclick = () => {
+    if (dashboardMode === "csv") {
+        return;
+    }
+
     fetch("/toggle-demo", { method: "POST" })
         .then(res => res.json())
         .then(data => {
             demoEnabled = data.demo;
-
-            const btn = document.getElementById("demoBtn");
-
-            if (demoEnabled) {
-                btn.innerText = "Stop Attack Simulation";
-                btn.classList.add("is-active");
-            } else {
-                attackIntensity = 0;
-                trafficAxisMax = Math.max(THRESHOLDS.traffic.critical * 1.2, 10);
-                btn.innerText = "Simulate Attack";
-                btn.classList.remove("is-active");
-            }
+            syncDemoButtonState();
         });
 };
 const reportBtn = document.getElementById("reportBtn");
@@ -1841,6 +1860,280 @@ const csvMeta = document.getElementById("csvMeta");
 const csvBreakdown = document.getElementById("csvBreakdown");
 const csvPreviewTitle = document.getElementById("csvPreviewTitle");
 const csvPreview = document.getElementById("csvPreview");
+const backToLiveBtn = document.getElementById("backToLiveBtn");
+const healthHeading = document.getElementById("healthHeading");
+const metricOneLabel = document.getElementById("metricOneLabel");
+const metricTwoLabel = document.getElementById("metricTwoLabel");
+const metricThreeLabel = document.getElementById("metricThreeLabel");
+const counterHeading = document.getElementById("counterHeading");
+const counterOneLabel = document.getElementById("counterOneLabel");
+const counterTwoLabel = document.getElementById("counterTwoLabel");
+const counterThreeLabel = document.getElementById("counterThreeLabel");
+const topSourcesTitle = document.getElementById("topSourcesTitle");
+const topPortsTitle = document.getElementById("topPortsTitle");
+const protocolTitle = document.getElementById("protocolTitle");
+const trafficChartTitle = document.getElementById("trafficChartTitle");
+const connectionsChartTitle = document.getElementById("connectionsChartTitle");
+const riskChartTitle = document.getElementById("riskChartTitle");
+const historyTitle = document.getElementById("historyTitle");
+const historySubtitle = document.getElementById("historySubtitle");
+
+let dashboardMode = "live";
+let csvDashboardState = null;
+
+function renderHistoryEntries(logs, emptyMessage = "No events yet") {
+    const logDiv = document.getElementById("log");
+    logDiv.innerHTML = "";
+
+    if (!Array.isArray(logs) || logs.length === 0) {
+        logDiv.innerHTML = `<div class="log-empty">${escapeHtml(emptyMessage)}</div>`;
+        return;
+    }
+
+    logs.forEach(item => {
+        let cls = "log-normal";
+        if (item.risk === "HIGH") cls = "log-high";
+        else if (item.risk === "MEDIUM") cls = "log-medium";
+
+        logDiv.innerHTML += `
+            <div class="log-entry ${cls}">
+                <strong>${escapeHtml(item.attack || "Unknown")}</strong><br>
+                <span class="log-meta">${escapeHtml(item.time || "--")} | ${formatConfidencePercent(item.confidence)}</span>
+            </div>
+        `;
+    });
+}
+
+function clearChartData(chart) {
+    chart.data.labels = [];
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data = [];
+    });
+}
+
+function setChartPointVisibility(chart, pointRadius, hoverRadius = pointRadius + 2) {
+    chart.data.datasets.forEach((dataset, index) => {
+        if (index >= 2 && chart === trafficChart) {
+            return;
+        }
+        if (index >= 1 && chart === connChart) {
+            return;
+        }
+        if (index >= 1 && chart === riskChart) {
+            return;
+        }
+        dataset.pointRadius = pointRadius;
+        dataset.pointHoverRadius = hoverRadius;
+    });
+}
+
+function syncDemoButtonState() {
+    if (dashboardMode === "csv") {
+        demoBtn.disabled = true;
+        demoBtn.classList.remove("is-active");
+        demoBtn.innerText = "CSV Mode Active";
+        backToLiveBtn.hidden = false;
+        document.getElementById("mode").innerText = "CSV REPORT";
+        return;
+    }
+
+    demoBtn.disabled = false;
+    backToLiveBtn.hidden = true;
+    if (demoEnabled) {
+        demoBtn.innerText = "Stop Attack Simulation";
+        demoBtn.classList.add("is-active");
+        document.getElementById("mode").innerText = "DEMO";
+    } else {
+        attackIntensity = 0;
+        demoBtn.innerText = "Simulate Attack";
+        demoBtn.classList.remove("is-active");
+        document.getElementById("mode").innerText = "LIVE";
+    }
+}
+
+function applyLivePanelText() {
+    healthHeading.innerText = "System Health";
+    metricOneLabel.innerText = "CPU";
+    metricTwoLabel.innerText = "Memory";
+    metricThreeLabel.innerText = "Network";
+    counterHeading.innerText = "Live Packet Counter";
+    counterOneLabel.innerText = "Packets Sent/sec";
+    counterTwoLabel.innerText = "Packets Recv/sec";
+    counterThreeLabel.innerText = "Connections";
+    topSourcesTitle.innerText = "Top Source IPs";
+    topPortsTitle.innerText = "Top Destination Ports";
+    protocolTitle.innerText = "Protocol Distribution";
+    trafficChartTitle.innerText = "Traffic Rate";
+    connectionsChartTitle.innerText = "Active Connections";
+    riskChartTitle.innerText = "Risk Confidence";
+    historyTitle.innerText = "Attack History";
+    historySubtitle.innerText = "Latest 10 detection events";
+
+    trafficChart.data.datasets[0].label = "Incoming";
+    trafficChart.data.datasets[1].label = "Outgoing";
+    trafficChart.data.datasets[2].hidden = false;
+    trafficChart.data.datasets[3].hidden = false;
+    setChartPointVisibility(trafficChart, 0, 5);
+
+    connChart.data.datasets[0].label = "Connections";
+    connChart.data.datasets[1].hidden = false;
+    connChart.data.datasets[2].hidden = false;
+    setChartPointVisibility(connChart, 0, 5);
+
+    riskChart.data.datasets[0].label = "Confidence";
+    riskChart.data.datasets[1].hidden = false;
+    riskChart.data.datasets[2].hidden = false;
+    setChartPointVisibility(riskChart, 0, 5);
+
+    clearChartData(trafficChart);
+    clearChartData(connChart);
+    clearChartData(riskChart);
+    trafficChart.options.scales.y.type = "linear";
+    trafficChart.options.scales.y.min = 0;
+    trafficChart.options.scales.y.max = undefined;
+    trafficChart.options.scales.y.suggestedMax = undefined;
+    connChart.options.scales.y.suggestedMax = THRESHOLDS.connections.critical;
+    riskChart.options.scales.y.suggestedMax = 100;
+    trafficChart.update();
+    connChart.update();
+    riskChart.update();
+
+    syncDemoButtonState();
+}
+
+function renderCsvSummaryBars(summary) {
+    const attackShare = (Number(summary.attack_rows || 0) / Math.max(Number(summary.rows_processed || 0), 1)) * 100;
+    updateBar("cpuBar", "cpuText", Number(summary.high_risk_share || 0), "%");
+    updateBar("ramBar", "ramText", attackShare, "%");
+    updateBar("netBar", "netText", Number(summary.confidence || 0), "%");
+}
+
+function renderCsvCounterStats(summary) {
+    document.getElementById("pktSent").innerText = formatCount(summary.rows_processed || 0);
+    document.getElementById("pktRecv").innerText = formatCount(summary.unique_sources || 0);
+    document.getElementById("connLive").innerText = formatCount(summary.unique_ports || 0);
+}
+
+function renderCsvCharts(csvState) {
+    const summary = (csvState && csvState.dashboard) || {};
+    const chartSeries = summary.chart_series || {};
+    const labels = Array.isArray(chartSeries.labels) && chartSeries.labels.length
+        ? chartSeries.labels
+        : [summary.chart_label || "CSV Snapshot"];
+    const trafficIncomingSeries = Array.isArray(chartSeries.traffic_incoming) && chartSeries.traffic_incoming.length
+        ? chartSeries.traffic_incoming.map((value) => Math.max(0, Number(value || 0)))
+        : [Math.max(0, Number(summary.traffic_incoming || 0))];
+    const trafficOutgoingSeries = Array.isArray(chartSeries.traffic_outgoing) && chartSeries.traffic_outgoing.length
+        ? chartSeries.traffic_outgoing.map((value) => Math.max(0, Number(value || 0)))
+        : [Math.max(0, Number(summary.traffic_outgoing || 0))];
+    const connectionsSeries = Array.isArray(chartSeries.connections) && chartSeries.connections.length
+        ? chartSeries.connections.map((value) => Math.max(0, Number(value || 0)))
+        : [Math.max(0, Number(summary.connections_metric || 0))];
+    const confidenceSeries = Array.isArray(chartSeries.confidence) && chartSeries.confidence.length
+        ? chartSeries.confidence.map((value) => Math.max(0, Number(value || 0)))
+        : [Math.max(0, Number(summary.confidence || 0))];
+    const csvPointRadius = labels.length > 1 ? 0 : 5;
+    const csvHoverRadius = labels.length > 1 ? 5 : 7;
+
+    clearChartData(trafficChart);
+    clearChartData(connChart);
+    clearChartData(riskChart);
+
+    trafficChartTitle.innerText = "Traffic Rate";
+    trafficChart.data.labels = labels;
+    trafficChart.data.datasets[0].label = "Incoming";
+    trafficChart.data.datasets[1].label = "Outgoing";
+    trafficChart.data.datasets[0].data = trafficIncomingSeries;
+    trafficChart.data.datasets[1].data = trafficOutgoingSeries;
+    trafficChart.data.datasets[2].hidden = true;
+    trafficChart.data.datasets[3].hidden = true;
+    setChartPointVisibility(trafficChart, csvPointRadius, csvHoverRadius);
+    trafficChart.options.scales.y.type = "linear";
+    trafficChart.options.scales.y.min = 0;
+    trafficChart.options.scales.y.max = Math.max(
+        5,
+        Math.ceil(Math.max(...trafficIncomingSeries, ...trafficOutgoingSeries, 1) * 1.25)
+    );
+    trafficChart.options.scales.y.suggestedMax = undefined;
+
+    connectionsChartTitle.innerText = "Active Connections";
+    connChart.data.labels = labels;
+    connChart.data.datasets[0].label = "Connections";
+    connChart.data.datasets[0].data = connectionsSeries;
+    connChart.data.datasets[1].hidden = true;
+    connChart.data.datasets[2].hidden = true;
+    setChartPointVisibility(connChart, csvPointRadius, csvHoverRadius);
+    connChart.options.scales.y.suggestedMax = Math.max(
+        5,
+        Math.ceil(Math.max(...connectionsSeries, 1) * 1.25)
+    );
+
+    riskChartTitle.innerText = "Risk Confidence";
+    riskChart.data.labels = labels;
+    riskChart.data.datasets[0].label = "Confidence";
+    riskChart.data.datasets[0].data = confidenceSeries;
+    riskChart.data.datasets[1].hidden = false;
+    riskChart.data.datasets[2].hidden = false;
+    setChartPointVisibility(riskChart, csvPointRadius, csvHoverRadius);
+    riskChart.data.datasets[1].data = Array(riskChart.data.labels.length).fill(THRESHOLDS.confidence.warning);
+    riskChart.data.datasets[2].data = Array(riskChart.data.labels.length).fill(THRESHOLDS.confidence.critical);
+    riskChart.options.scales.y.suggestedMax = 100;
+
+    trafficChart.update();
+    connChart.update();
+    riskChart.update();
+}
+
+function activateCsvMode(csvState) {
+    const summary = csvState && csvState.dashboard;
+    if (!summary) {
+        return;
+    }
+
+    dashboardMode = "csv";
+    csvDashboardState = csvState;
+    demoEnabled = false;
+
+    healthHeading.innerText = "CSV Summary";
+    metricOneLabel.innerText = "High Risk Share";
+    metricTwoLabel.innerText = "Attack Share";
+    metricThreeLabel.innerText = "Average Confidence";
+    counterHeading.innerText = "CSV Volume";
+    counterOneLabel.innerText = "Rows Analysed";
+    counterTwoLabel.innerText = "Unique Sources";
+    counterThreeLabel.innerText = "Unique Ports";
+    topSourcesTitle.innerText = "CSV Source Addresses";
+    topPortsTitle.innerText = "Observed Ports";
+    protocolTitle.innerText = "Protocol Mix";
+    historyTitle.innerText = "CSV Findings";
+    historySubtitle.innerText = "Top 10 rows by confidence";
+
+    updateStatus({
+        attack: summary.attack || "Normal",
+        risk: summary.risk || "LOW",
+        confidence: Number(summary.confidence || 0)
+    });
+    document.getElementById("mode").innerText = summary.mode || "CSV REPORT";
+
+    renderCsvSummaryBars(summary);
+    renderCsvCounterStats(summary);
+    updateTopSources(summary.top_source_ips || []);
+    updateTopPorts(summary.top_destination_ports || []);
+    updateProtocolDistribution(summary.protocol_distribution || []);
+    renderHistoryEntries(summary.history || [], "No CSV findings yet");
+    renderCsvCharts(csvState);
+    syncDemoButtonState();
+}
+
+function activateLiveMode() {
+    dashboardMode = "live";
+    csvDashboardState = null;
+    csvFileInput.value = "";
+    applyLivePanelText();
+    updateHistory();
+}
+
+applyLivePanelText();
 
 function setCsvStatus(message, isError = false) {
     csvStatus.textContent = message;
@@ -1991,7 +2284,7 @@ async function analyzeCsvUpload() {
             throw new Error(payload.error || "CSV analysis failed.");
         }
 
-        setCsvStatus(`Complete: ${payload.rows_processed} rows scored.`);
+        setCsvStatus(`Complete: ${payload.rows_processed} rows scored. Dashboard is now showing uploaded CSV data.`);
         const inputModeLabel = payload.input_mode === "pc_activity"
             ? "PC Activity CSV"
             : "Model Feature CSV";
@@ -2005,6 +2298,7 @@ async function analyzeCsvUpload() {
 
         renderCsvBreakdown(payload.attack_breakdown);
         renderCsvPreview(payload.preview);
+        activateCsvMode(payload);
     } catch (error) {
         setCsvStatus(error.message || "Could not analyze CSV.", true);
         renderCsvMeta(null);
@@ -2024,6 +2318,7 @@ csvFileInput.addEventListener("change", () => {
         setCsvStatus(`Selected file: ${file.name}`);
     } else {
         setCsvStatus("Upload a CSV to run row-wise attack prediction.");
+        activateLiveMode();
     }
     renderCsvMeta(null);
     csvBreakdown.innerHTML = `<div class="source-empty">Run analysis to view attack distribution.</div>`;
@@ -2065,7 +2360,7 @@ async function downloadLogScript() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "run_export_activity.bat";
+        a.download = "Activity_Generator.bat";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -2086,6 +2381,68 @@ async function downloadReport() {
     reportBtn.innerText = "Preparing...";
 
     try {
+        if (dashboardMode === "csv" && csvDashboardState) {
+            const summary = csvDashboardState.dashboard || {};
+            const generatedAt = new Date();
+            const rows = [];
+            rows.push([
+                "record_type",
+                "generated_at",
+                "mode",
+                "attack",
+                "risk",
+                "confidence",
+                "rows_processed",
+                "high_risk_rows",
+                "high_risk_share",
+                "normal_rows",
+                "attack_rows",
+                "unique_attack_types",
+                "unique_sources",
+                "unique_ports"
+            ].map(csvEscape).join(","));
+
+            rows.push([
+                "csv_summary",
+                generatedAt.toISOString(),
+                summary.mode || "CSV REPORT",
+                summary.attack,
+                summary.risk,
+                summary.confidence,
+                summary.rows_processed,
+                summary.high_risk_rows,
+                summary.high_risk_share,
+                summary.normal_rows,
+                summary.attack_rows,
+                summary.unique_attack_types,
+                summary.unique_sources,
+                summary.unique_ports
+            ].map(csvEscape).join(","));
+
+            (summary.history || []).forEach((item) => {
+                rows.push([
+                    "csv_row",
+                    generatedAt.toISOString(),
+                    summary.mode || "CSV REPORT",
+                    item.attack,
+                    item.risk,
+                    item.confidence,
+                    item.time,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ].map(csvEscape).join(","));
+            });
+
+            const stamp = generatedAt.toISOString().replace(/[:.]/g, "-");
+            downloadCsv(rows.join("\r\n"), `ids-csv-report-${stamp}.csv`);
+            return;
+        }
+
         const [metricsRes, healthRes, historyRes] = await Promise.all([
             fetch("/metrics"),
             fetch("/health"),
@@ -2189,6 +2546,10 @@ async function downloadReport() {
 
 reportBtn.addEventListener("click", downloadReport);
 downloadScriptBtn.addEventListener("click", downloadLogScript);
+backToLiveBtn.addEventListener("click", () => {
+    setCsvStatus("Returned to live PC monitoring.");
+    activateLiveMode();
+});
 
 function updateBar(barId, textId, value, unit, displayValue = null) {
     const bar = document.getElementById(barId);
@@ -2211,4 +2572,3 @@ function updateBar(barId, textId, value, unit, displayValue = null) {
 </script>
 </body>
 </html>
-

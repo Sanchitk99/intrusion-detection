@@ -86,7 +86,7 @@ def analyze_csv():
 
 @app.route("/download-log-script", methods=["GET"])
 def download_log_script():
-    script_name = "run_export_activity.bat"
+    script_name = "Activity_Generator.bat"
     script_path = SCRIPTS_DIR / script_name
     if not script_path.exists():
         abort(404)

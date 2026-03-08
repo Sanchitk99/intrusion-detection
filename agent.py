@@ -537,6 +537,210 @@ def _coerce_uploaded_column(series, column_name):
     return numeric.fillna(0.0).astype("float64")
 
 
+def _pick_first_available_series(dataframe, column_names):
+    for column_name in column_names:
+        if column_name in dataframe.columns:
+            return dataframe[column_name]
+    return None
+
+
+def _count_text_values(series, key_name, limit=5, empty_tokens=None):
+    if series is None:
+        return [], 0
+
+    empty_tokens = empty_tokens or {"", "unknown", "nan", "none", "null", "0", "::", "::1", "127.0.0.1"}
+    cleaned = (
+        series.fillna("")
+        .astype(str)
+        .str.strip()
+    )
+    cleaned = cleaned[~cleaned.str.lower().isin({token.lower() for token in empty_tokens})]
+
+    if cleaned.empty:
+        return [], 0
+
+    counts = cleaned.value_counts()
+    return [
+        {key_name: value, "connections": int(count)}
+        for value, count in counts.head(limit).items()
+    ], int(counts.shape[0])
+
+
+def _count_port_values(dataframe, column_names, limit=5):
+    numeric_series = []
+
+    for column_name in column_names:
+        if column_name not in dataframe.columns:
+            continue
+
+        numeric = pd.to_numeric(dataframe[column_name], errors="coerce").dropna()
+        numeric = numeric[numeric > 0].astype(int)
+        if not numeric.empty:
+            numeric_series.append(numeric)
+
+    if not numeric_series:
+        return [], 0
+
+    combined = pd.concat(numeric_series, ignore_index=True)
+    counts = combined.value_counts()
+    return [
+        {"port": int(port), "connections": int(count)}
+        for port, count in counts.head(limit).items()
+    ], int(counts.shape[0])
+
+
+def _build_protocol_distribution(dataframe):
+    protocol_series = _pick_first_available_series(dataframe, ["protocol", "protocol_type"])
+    if protocol_series is None:
+        return []
+
+    cleaned = (
+        protocol_series.fillna("")
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
+    cleaned = cleaned[cleaned.ne("")]
+    if cleaned.empty:
+        return []
+
+    counts = cleaned.value_counts()
+    total = int(counts.sum())
+    return [
+        {
+            "protocol": protocol,
+            "connections": int(count),
+            "percentage": round((int(count) / max(total, 1)) * 100, 1)
+        }
+        for protocol, count in counts.head(5).items()
+    ]
+
+
+def _mean_numeric_value(dataframe, column_names):
+    for column_name in column_names:
+        if column_name not in dataframe.columns:
+            continue
+
+        numeric = pd.to_numeric(dataframe[column_name], errors="coerce").dropna()
+        if not numeric.empty:
+            return round(float(numeric.mean()), 2)
+
+    return None
+
+
+def _extract_numeric_series(dataframe, column_names, limit=20):
+    for column_name in column_names:
+        if column_name not in dataframe.columns:
+            continue
+
+        numeric = pd.to_numeric(dataframe[column_name], errors="coerce").fillna(0.0).astype("float64")
+        if len(numeric):
+            return numeric.head(limit).tolist()
+
+    return []
+
+
+def _build_csv_chart_series(source_dataframe, results, limit=20):
+    row_count = min(limit, len(results))
+    labels = [f"R{int(row)}" for row in results["row"].head(row_count).tolist()]
+
+    traffic_incoming = _extract_numeric_series(source_dataframe, ["dst_rate", "count", "srv_count"], row_count)
+    traffic_outgoing = _extract_numeric_series(source_dataframe, ["src_rate", "srv_count", "count"], row_count)
+    connections = _extract_numeric_series(source_dataframe, ["connections", "count", "srv_count"], row_count)
+    confidence = results["confidence"].head(row_count).astype("float64").tolist()
+
+    return {
+        "labels": labels,
+        "traffic_incoming": traffic_incoming,
+        "traffic_outgoing": traffic_outgoing,
+        "connections": connections,
+        "confidence": confidence
+    }
+
+
+def _build_csv_dashboard_summary(original, source_dataframe, results, attack_breakdown, source_mode):
+    rows_processed = int(len(results))
+    high_risk_rows = int((results["risk"] == "HIGH").sum())
+    medium_risk_rows = int((results["risk"] == "MEDIUM").sum())
+    low_risk_rows = int((results["risk"] == "LOW").sum())
+    normal_rows = int(attack_breakdown.get("Normal", 0))
+    attack_rows = max(rows_processed - normal_rows, 0)
+    average_confidence = round(float(results["confidence"].mean()), 2) if rows_processed else 0.0
+    high_risk_share = round((high_risk_rows / max(rows_processed, 1)) * 100, 1)
+    dominant_attack = max(attack_breakdown.items(), key=lambda item: int(item[1]))[0] if attack_breakdown else "Normal"
+
+    if high_risk_share >= 20 or average_confidence >= 80:
+        overall_risk = "HIGH"
+    elif high_risk_rows > 0 or medium_risk_rows > 0 or average_confidence >= 60:
+        overall_risk = "MEDIUM"
+    else:
+        overall_risk = "LOW"
+
+    top_sources, unique_sources = _count_text_values(
+        _pick_first_available_series(
+            original,
+            ["remote_address", "source_ip", "src_ip", "ip", "local_address"]
+        ),
+        key_name="ip"
+    )
+    top_ports, unique_ports = _count_port_values(
+        original,
+        ["remote_port", "local_port", "dst_port", "src_port"]
+    )
+    protocol_distribution = _build_protocol_distribution(original)
+
+    average_src_rate = _mean_numeric_value(original, ["src_rate"])
+    average_dst_rate = _mean_numeric_value(original, ["dst_rate"])
+    average_connections = _mean_numeric_value(original, ["connections", "count", "srv_count"])
+
+    traffic_incoming = average_dst_rate if average_dst_rate is not None else float(rows_processed)
+    traffic_outgoing = average_src_rate if average_src_rate is not None else float(max(unique_sources, 1))
+    connections_metric = average_connections if average_connections is not None else float(rows_processed)
+
+    history_rows = (
+        results.sort_values(["confidence", "row"], ascending=[False, True])
+        .head(10)
+        .to_dict(orient="records")
+    )
+    history = [
+        {
+            "time": f"Row {int(entry['row'])}",
+            "attack": entry["prediction"],
+            "risk": entry["risk"],
+            "confidence": float(entry["confidence"])
+        }
+        for entry in history_rows
+    ]
+    chart_series = _build_csv_chart_series(source_dataframe, results)
+
+    return {
+        "mode": "CSV REPORT",
+        "input_mode": source_mode,
+        "attack": dominant_attack,
+        "risk": overall_risk,
+        "confidence": average_confidence,
+        "rows_processed": rows_processed,
+        "high_risk_rows": high_risk_rows,
+        "medium_risk_rows": medium_risk_rows,
+        "low_risk_rows": low_risk_rows,
+        "high_risk_share": high_risk_share,
+        "normal_rows": normal_rows,
+        "attack_rows": attack_rows,
+        "unique_attack_types": int(len(attack_breakdown)),
+        "unique_sources": unique_sources,
+        "unique_ports": unique_ports,
+        "traffic_incoming": round(float(traffic_incoming), 2),
+        "traffic_outgoing": round(float(traffic_outgoing), 2),
+        "connections_metric": round(float(connections_metric), 2),
+        "chart_label": "CSV Snapshot",
+        "chart_series": chart_series,
+        "top_source_ips": top_sources,
+        "top_destination_ports": top_ports,
+        "protocol_distribution": protocol_distribution,
+        "history": history
+    }
+
+
 def analyze_uploaded_csv(dataframe, preview_limit=30):
     if dataframe is None or dataframe.empty:
         raise ValueError("Uploaded CSV is empty.")
@@ -585,6 +789,13 @@ def analyze_uploaded_csv(dataframe, preview_limit=30):
 
     attack_breakdown = results["prediction"].value_counts().to_dict()
     missing_columns = [column for column in expected_columns if column not in source_dataframe.columns]
+    dashboard_summary = _build_csv_dashboard_summary(
+        original,
+        source_dataframe,
+        results,
+        attack_breakdown,
+        source_mode
+    )
 
     return {
         "input_mode": source_mode,
@@ -593,7 +804,8 @@ def analyze_uploaded_csv(dataframe, preview_limit=30):
         "attack_breakdown": attack_breakdown,
         "missing_columns": missing_columns,
         "ignored_columns": ignored_columns,
-        "preview": results.head(preview_limit).to_dict(orient="records")
+        "preview": results.head(preview_limit).to_dict(orient="records"),
+        "dashboard": dashboard_summary
     }
 
 from pynvml import *

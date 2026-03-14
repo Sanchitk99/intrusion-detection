@@ -1209,7 +1209,7 @@ html, body {
 const maxPoints = 15;
 let attackIntensity = 0;
 const THRESHOLDS = {
-    traffic: { warning: 500000, critical: 1500000 },
+    traffic: { warning: 200000, critical: 500000 },
     connections: { warning: 120, critical: 250 },
     confidence: { warning: 70, critical: 85 }
 };
@@ -1261,6 +1261,10 @@ function updateTrafficAxisMax(currentValues, criticalThreshold) {
     return Math.max(recentPeak * 1.2, 10);
 }
 
+function clampThresholdToAxis(thresholdValue, axisMax) {
+    return Math.min(Math.max(0, toNumber(thresholdValue, 0)), Math.max(1, toNumber(axisMax, 1)));
+}
+
 const buildChartOptions = (opts = {}) => ({
     responsive: true,
     maintainAspectRatio: false,
@@ -1287,7 +1291,32 @@ const buildChartOptions = (opts = {}) => ({
             borderWidth: 1,
             titleColor: "#f8fbff",
             bodyColor: "#f0f0f0",
-            intersect: false
+            intersect: false,
+            callbacks: {
+                label: (context) => {
+                    const label = context.dataset.label || "";
+                    const chartId = context.chart?.canvas?.id || "";
+                    const thresholdKey = label === "Warning Threshold"
+                        ? "warning"
+                        : label === "Critical Threshold"
+                            ? "critical"
+                            : null;
+
+                    let value = toNumber(context.parsed?.y, 0);
+                    if (thresholdKey) {
+                        if (chartId === "trafficChart") {
+                            value = toNumber(THRESHOLDS.traffic[thresholdKey], value);
+                        } else if (chartId === "connChart") {
+                            value = toNumber(THRESHOLDS.connections[thresholdKey], value);
+                        } else if (chartId === "riskChart") {
+                            value = toNumber(THRESHOLDS.confidence[thresholdKey], value);
+                        }
+                    }
+
+                    const formatter = opts.yTickFormatter || ((rawValue) => rawValue);
+                    return `${label}: ${formatter(value)}`;
+                }
+            }
         }
     },
     scales: {
@@ -1361,7 +1390,7 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: "Warning Threshold",
                 data: [],
-                yAxisID: "yThreshold",
+                yAxisID: "y",
                 borderColor: "#f59e0b",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -1372,7 +1401,7 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
             {
                 label: "Critical Threshold",
                 data: [],
-                yAxisID: "yThreshold",
+                yAxisID: "y",
                 borderColor: "#ef4444",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -1442,7 +1471,7 @@ const connChart = new Chart(document.getElementById('connChart'), {
             {
                 label: "Warning Threshold",
                 data: [],
-                yAxisID: "yThreshold",
+                yAxisID: "y",
                 borderColor: "#f59e0b",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -1453,7 +1482,7 @@ const connChart = new Chart(document.getElementById('connChart'), {
             {
                 label: "Critical Threshold",
                 data: [],
-                yAxisID: "yThreshold",
+                yAxisID: "y",
                 borderColor: "#ef4444",
                 borderDash: [6, 6],
                 borderWidth: 1.6,
@@ -1702,24 +1731,31 @@ function updateCharts(data) {
         trafficIncoming,
         trafficOutgoing
     ], trafficCritical);
+    const trafficWarningDisplay = clampThresholdToAxis(trafficWarning, trafficAxisTarget);
+    const trafficCriticalDisplay = clampThresholdToAxis(trafficCritical, trafficAxisTarget);
     trafficChart.data.labels.push(time);
     trafficChart.data.datasets[0].data.push(trafficIncoming);
     trafficChart.data.datasets[1].data.push(trafficOutgoing);
-    trafficChart.data.datasets[2].data = Array(trafficChart.data.labels.length).fill(trafficWarning);
-    trafficChart.data.datasets[3].data = Array(trafficChart.data.labels.length).fill(trafficCritical);
+    trafficChart.data.datasets[2].data = Array(trafficChart.data.labels.length).fill(trafficWarningDisplay);
+    trafficChart.data.datasets[3].data = Array(trafficChart.data.labels.length).fill(trafficCriticalDisplay);
 
     trafficChart.options.scales.y.type = "linear";
     trafficChart.options.scales.y.min = 0;
     trafficChart.options.scales.y.max = Math.ceil(Math.max(trafficAxisTarget, 10));
     trafficChart.options.scales.y.suggestedMax = undefined;
-    trafficChart.options.scales.yThreshold.max = Math.max(trafficCritical, trafficWarning * 1.2);
+    trafficChart.options.scales.yThreshold.max = Math.max(trafficAxisTarget, 10);
 
     connChart.data.labels.push(time);
     connChart.data.datasets[0].data.push(Math.max(1, toNumber(data.connections, 0)));
-    connChart.data.datasets[1].data = Array(connChart.data.labels.length).fill(THRESHOLDS.connections.warning);
-    connChart.data.datasets[2].data = Array(connChart.data.labels.length).fill(THRESHOLDS.connections.critical);
     const connLiveMax = Math.max(...connChart.data.datasets[0].data, 1);
-    connChart.options.scales.y.suggestedMax = Math.max(25, Math.ceil(connLiveMax * 1.25));
+    const connAxisTarget = Math.max(25, Math.ceil(connLiveMax * 1.25));
+    const connWarningDisplay = clampThresholdToAxis(THRESHOLDS.connections.warning, connAxisTarget);
+    const connCriticalDisplay = clampThresholdToAxis(THRESHOLDS.connections.critical, connAxisTarget);
+    connChart.data.datasets[1].data = Array(connChart.data.labels.length).fill(connWarningDisplay);
+    connChart.data.datasets[2].data = Array(connChart.data.labels.length).fill(connCriticalDisplay);
+    connChart.options.scales.y.max = connAxisTarget;
+    connChart.options.scales.y.suggestedMax = undefined;
+    connChart.options.scales.yThreshold.max = connAxisTarget;
 
     riskChart.data.labels.push(time);
     riskChart.data.datasets[0].data.push(toNumber(data.confidence, 0));
@@ -1992,6 +2028,7 @@ function applyLivePanelText() {
     trafficChart.options.scales.y.min = 0;
     trafficChart.options.scales.y.max = undefined;
     trafficChart.options.scales.y.suggestedMax = undefined;
+    connChart.options.scales.y.max = undefined;
     connChart.options.scales.y.suggestedMax = THRESHOLDS.connections.critical;
     riskChart.options.scales.y.suggestedMax = 100;
     trafficChart.update();
@@ -2063,6 +2100,7 @@ function renderCsvCharts(csvState) {
     connChart.data.datasets[1].hidden = true;
     connChart.data.datasets[2].hidden = true;
     setChartPointVisibility(connChart, csvPointRadius, csvHoverRadius);
+    connChart.options.scales.y.max = undefined;
     connChart.options.scales.y.suggestedMax = Math.max(
         5,
         Math.ceil(Math.max(...connectionsSeries, 1) * 1.25)

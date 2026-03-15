@@ -2,9 +2,13 @@ from pathlib import Path
 
 from flask import Flask, render_template, jsonify, request, send_from_directory, abort
 import pandas as pd
-from agent import get_live_metrics
-from agent import get_attack_log
-from agent import analyze_uploaded_csv
+from agent import (
+    get_live_metrics,
+    get_attack_log,
+    analyze_uploaded_csv,
+    reset_agent_state,
+    DEFAULT_METRICS
+)
 
 app = Flask(__name__)
 DEMO_MODE = False
@@ -50,6 +54,18 @@ def toggle_demo():
     global DEMO_MODE
     DEMO_MODE = not DEMO_MODE
     return jsonify({"demo": DEMO_MODE})
+
+
+@app.route("/reset-stats", methods=["POST"])
+def reset_stats():
+    global DEMO_MODE
+    DEMO_MODE = False
+    reset_agent_state()
+    return jsonify({
+        "message": "Stats reset to live defaults.",
+        "metrics": {**DEFAULT_METRICS},
+        "history": get_attack_log()
+    })
 
 
 @app.route("/analyze-csv", methods=["POST"])

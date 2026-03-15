@@ -7,7 +7,7 @@ import random
 import time
 from collections import Counter
 import socket
-LAST_METRICS = {
+DEFAULT_METRICS = {
     "attack": "Normal",
     "risk": "LOW",
     "confidence": 0.0,
@@ -19,12 +19,19 @@ LAST_METRICS = {
     "top_source_ips": [],
     "top_destination_ports": [],
     "protocol_distribution": []
-
 }
+LAST_METRICS = dict(DEFAULT_METRICS)
 ATTACK_LOG = []
 LAST_LOG_TIME = 0
 LOG_INTERVAL = 10        # seconds
 MAX_LOG_SIZE = 10        # only keep last 10 logs
+
+def reset_agent_state():
+    global ATTACK_LOG, LAST_METRICS, PREV_STATS, LAST_LOG_TIME
+    ATTACK_LOG = []
+    LAST_METRICS = dict(DEFAULT_METRICS)
+    PREV_STATS = None
+    LAST_LOG_TIME = 0
 
 # --------------------------------------------------
 # Load trained artifacts

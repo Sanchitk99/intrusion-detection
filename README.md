@@ -1,175 +1,257 @@
 <p align="center">
-  <img src="static/logo.svg" alt="SENTINEL Logo" width="320"/>
+  <img src="static/logo.svg" alt="SENTINEL Logo" width="340"/>
 </p>
 
 # SENTINEL — Autonomous Cyber Defense
-### Enterprise-Grade Machine Learning Network Intrusion Detection System &amp; SOC Alert Core
+### Machine Learning Network Intrusion Detection System & SOC Alert Core
 
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![Framework](https://img.shields.io/badge/Scikit--Learn-1.4%2B-orange.svg)](https://scikit-learn.org/)
-[![Dashboard](https://img.shields.io/badge/UI-Cyber--HUD%20Command%20Center-cyan.svg)](templates/dashboard.html)
-[![Policy](https://img.shields.io/badge/Action%20Policy-SOC%20Alert%20Only%20(No%20Auto--Block)-red.svg)](#soc-alerting-philosophy)
+[![Web Core](https://img.shields.io/badge/Flask-3.0%2B-lightgrey.svg)](https://flask.palletsprojects.com/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![Action Policy](https://img.shields.io/badge/Action%20Policy-ALERT__ONLY__NO__AUTO__BLOCK-red.svg)](#7-soc-alerting-philosophy--action-policy)
+[![Test Suite](https://img.shields.io/badge/Tests-22%20Passed-brightgreen.svg)](#10-testing--reproducibility)
 
 ---
 
-## 1. Challenge Scenario & Executive Summary
+## Table of Contents
 
-In enterprise network defense, signature-based Intrusion Detection Systems (e.g., Snort, Suricata, Zeek) rely on predefined byte sequences, regex rules, and known hash catalogs. While signature engines excel at deterministic detection of known threats with near-zero false positives, they are systematically blind to:
-1. **Zero-Day Exploits & Novel Attack Variants:** Uncataloged vulnerability exploits without existing signatures.
-2. **Polymorphic / Metamorphic Malware:** Encrypted or obfuscated payload variations that alter packet bytes while preserving malicious intent.
-3. **Slow-and-Low Scanning & Distributed Probing:** Behavioral anomalies that mimic legitimate connection handshakes but exhibit abnormal aggregate spatial and temporal distributions.
+1. [Executive Summary & Challenge Context](#1-executive-summary--challenge-context)
+2. [System Architecture](#2-system-architecture)
+3. [Supported Datasets & Provenance](#3-supported-datasets--provenance)
+4. [Empirical Benchmark & Evaluation Results](#4-empirical-benchmark--evaluation-results)
+   - [4.1 Dataset-Specific Model Performance](#41-dataset-specific-model-performance)
+   - [4.2 Cross-Dataset Transfer & Domain Shift Reality](#42-cross-dataset-transfer--domain-shift-reality)
+   - [4.3 Duplicate-Aware & Leakage-Free NSL-KDD Evaluation](#43-duplicate-aware--leakage-free-nsl-kdd-evaluation)
+   - [4.4 Class Imbalance & Minority Attack Evaluation](#44-class-imbalance--minority-attack-evaluation)
+5. [Model Drift & Distribution Monitoring](#5-model-drift--distribution-monitoring)
+6. [Telemetry Ingestion & Feature Provenance](#6-telemetry-ingestion--feature-provenance)
+7. [SOC Alerting Philosophy & Action Policy](#7-soc-alerting-philosophy--action-policy)
+8. [Cyber-HUD Dashboard & REST API Reference](#8-cyber-hud-dashboard--rest-api-reference)
+9. [Installation & Windows Quickstart](#9-installation--windows-quickstart)
+10. [Testing & Reproducibility](#10-testing--reproducibility)
+11. [Project Structure & Storage Architecture](#11-project-structure--storage-architecture)
+12. [Known Limitations & Engineering Constraints](#12-known-limitations--engineering-constraints)
+13. [Realistic Future Improvements](#13-realistic-future-improvements)
+14. [License](#14-license)
 
-**The Solution:** Sentinel IDS implements a machine-learning-driven behavioral anomaly detection core designed to catch attacks that signatures miss. The system operates under a strict **SOC Alert Only (No Auto-Block)** philosophy: surfacing rich, confidence-calibrated telemetry alerts to Security Operations Center (SOC) analysts rather than initiating automatic network blocks that could disrupt critical enterprise infrastructure.
+---
+
+## 1. Executive Summary & Challenge Context
+
+Signature-based Intrusion Detection Systems (e.g., Snort, Suricata, Zeek) rely on predefined byte sequences, regex rules, and known hash catalogs. While signature engines excel at deterministic detection of known threats with near-zero false positives, they are fundamentally vulnerable to:
+
+1. **Zero-Day Vulnerabilities & Novel Variants:** Uncataloged exploits lacking vendor signatures.
+2. **Polymorphic / Obfuscated Payloads:** Payloads that alter byte sequences while preserving malicious execution semantics.
+3. **Slow-and-Low Scanning & Distributed Probing:** Behavioral traffic anomalies that mimic legitimate handshakes while executing reconnaissance across distributed source nodes.
+
+**SENTINEL** implements an anomaly detection core using supervised machine learning ensembles designed to detect attacks that signature engines miss. Operating under an uncompromising **`ALERT_ONLY_NO_AUTO_BLOCK`** policy, SENTINEL surfaces structured, context-rich alerts and operational playbooks to human SOC analysts, explicitly avoiding automated connection teardown that could disrupt production infrastructure or be weaponized via spoofing.
 
 ---
 
 ## 2. System Architecture
 
-Sentinel IDS consists of five decoupled, enterprise-grade subsystems:
+SENTINEL is engineered as a set of decoupled subsystems separating offline training and validation from real-time host telemetry, batch ingestion, drift monitoring, and SOC alert dissemination:
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion["1. Multi-Dataset & Telemetry Ingestion"]
-        D1["NSL-KDD (41 Features)"]
-        D2["CICIDS2017 (Flow Stats)"]
-        D3["UNSW-NB15 (Packet Windows)"]
-        D4["Live OS Socket Telemetry"]
-        D5["Host PC Activity CSV"]
+    subgraph DataIngestion["1. Telemetry & Data Ingestion"]
+        D1["Offline Datasets<br/>(NSL-KDD, UNSW-NB15, CICIDS2017)"]
+        D2["Live Host Socket Polling<br/>(psutil 5-Tuple Sessions)"]
+        D3["Batch CSV Telemetry<br/>(User File Uploads)"]
+        D4["Simulated Drills<br/>(origin: synthetic_attack_demo)"]
     end
 
     subgraph Preprocessing["2. Leakage-Free Preprocessing"]
-        P1["OneHotEncoder (handle_unknown='ignore')"]
-        P2["StandardScaler (Fitted on Train Fold Only)"]
-        P3["Duplicate & Conflict Filtering"]
+        P1["OneHotEncoder<br/>(handle_unknown='ignore')"]
+        P2["StandardScaler<br/>(Fitted on Train Partition Only)"]
+        P3["Duplicate & Conflict Group Isolation<br/>(StratifiedGroupKFold)"]
     end
 
-    subgraph Modeling["3. ML Ensemble & Imbalance Mitigation"]
-        M1["RandomForestClassifier (150 Trees)"]
-        M2["ExtraTreesClassifier"]
-        M3["BalancedRandomForest / ROS"]
+    subgraph ModelCore["3. Machine Learning Ensemble"]
+        M1["Dataset-Specific Pipelines<br/>(RandomForestClassifier 100 Trees)"]
+        M2["Model Comparison Engine<br/>(ExtraTrees vs. Balanced RF vs. ROS)"]
+        M3["Scoring Engine<br/>(Uncalibrated Vote Fractions)"]
     end
 
-    subgraph Drift["4. Model Drift & Distribution Monitor"]
-        DF1["Covariate Shift: Population Stability Index (PSI)"]
-        DF2["Kolmogorov-Smirnov 2-Sample Test"]
+    subgraph Monitoring["4. Statistical Drift Monitoring"]
+        DF1["Population Stability Index (PSI)<br/>(Covariate Shift Detection)"]
+        DF2["Kolmogorov-Smirnov 2-Sample Test<br/>(Continuous Distribution Shift)"]
         DF3["Data Quality & Categorical Novelty"]
     end
 
-    subgraph SOC["5. SOC Analyst Alert Core & Dashboard"]
-        S1["Structured JSON Alert (UUID, Indicators, Actions)"]
-        S2["Cyber-HUD Real-Time Interface"]
-        S3["No Auto-Block Enforcement Guarantee"]
+    subgraph Presentation["5. SOC Command Center & API"]
+        S1["Cyber-HUD Interface<br/>(Flask + Vanilla JS + CSS Grid)"]
+        S2["Structured JSON Alerts<br/>(UUID, Indicators, Actions, Provenance)"]
+        S3["Enforcement Verification<br/>(ALERT_ONLY_NO_AUTO_BLOCK)"]
     end
 
-    D1 & D2 & D3 & D5 --> Preprocessing
-    Preprocessing --> Modeling
-    Modeling --> Drift
-    Modeling --> SOC
-    D4 --> SOC
+    D1 --> Preprocessing
+    Preprocessing --> ModelCore
+    D2 --> Presentation
+    D3 --> Preprocessing
+    D4 --> Presentation
+    ModelCore --> Presentation
+    ModelCore --> Monitoring
 ```
+
+### Architectural Subsystem Boundaries
+
+- **Model Training & Evaluation:** Independent offline training pipelines (`scripts/train_dataset_models.py`, `scripts/evaluate_ids.py`, `scripts/compare_ids_models.py`). Preprocessing transformers are fit exclusively on training folds.
+- **Live OS Socket Telemetry (`agent.py` & `scripts/flow_engine.py`):** Extracts active TCP/UDP 5-tuple socket sessions (`src_ip`, `dst_ip`, `dst_port`, `protocol_type`, `service`, `flag`) via OS connection table polling.
+- **Batch CSV Ingestion:** Evaluates uploaded connection logs against the trained model pipeline (`/analyze-csv`).
+- **Simulated Attack Demonstrations:** Injected threat vectors for operator demonstration, tagged with `origin: "synthetic_attack_demo"`.
+- **Drift Monitoring (`scripts/drift_monitor.py`):** Evaluates incoming feature distributions against reference baseline distributions.
+- **SOC Alert Delivery (`/alerts` API):** Emits structured incident metadata with observed indicators, policy markers, and recommended analyst responses.
 
 ---
 
 ## 3. Supported Datasets & Provenance
 
-Sentinel IDS supports three benchmark datasets with distinct network topologies and feature definitions:
+SENTINEL supports three benchmark network intrusion datasets, maintaining strict schema isolation to prevent invalid feature concatenation:
 
-| Dataset | Origin / Provenance | Licensing | Key Feature Types | Canonical Label Mapping |
-|---|---|---|---|---|
-| **NSL-KDD** | University of New Brunswick (UNB) / Canadian Institute for Cybersecurity (Tavallaee et al., 2009). Refinement of KDD Cup 99 removing redundant and duplicated records. | Academic / Open Research | 41 connection features (duration, protocol, service, flags, bytes, error rates, host rates) | `Normal`, `DoS`, `Probe`, `R2L`, `U2R`, `Other` |
-| **CICIDS2017** | Canadian Institute for Cybersecurity (Sharafaldin et al., 2018). Captured in real network environments over 5 days (Mon–Fri) with modern attack vectors. | Open Research with Attribution | 78–84 flow metrics (inter-arrival times, packet length statistics, window flags, subflow rates) | `Normal`, `DoS`, `Probe`, `R2L`, `U2R`, `Other` |
-| **UNSW-NB15** | Australian Centre for Cyber Security (ACCS) (Moustafa & Slay, 2015). Synthesized with IXIA PerfectStorm generator simulating real modern attack behaviors. | Free for Non-Commercial Academic Use | 49 features (flow statistics, TCP window metrics, jitter, packet sizes, content attributes) | `Normal`, `DoS`, `Probe`, `R2L`, `U2R`, `Other` |
+| Dataset | Origin / Provenance | Key Characteristics | Feature Count | Canonical Mapped Classes |
+| :--- | :--- | :--- | :---: | :--- |
+| **NSL-KDD** | Canadian Institute for Cybersecurity / UNB (Tavallaee et al., 2009). Refined KDD Cup 99 removing redundant records. | Connection-level summary counters, service flags, host rates. | 41 | `Normal`, `DoS`, `Probe`, `R2L`, `U2R`, `Other` |
+| **UNSW-NB15** | Australian Centre for Cyber Security (Moustafa & Slay, 2015). Captured with IXIA PerfectStorm simulator. | Flow packet windows, TCP jitter, inter-arrival times, window sizes. | 42 | `Normal`, `DoS`, `Probe`, `R2L`, `U2R`, `Other` |
+| **CICIDS2017** | Canadian Institute for Cybersecurity (Sharafaldin et al., 2018). Captured in realistic enterprise testbed. | Flow statistical timings extracted via CICFlowMeter (evaluated on Friday PortScan subset). | 78 | `Normal`, `Probe` (PortScan) |
 
-### Cross-Dataset Transfer Strategy & Limitations
 > [!IMPORTANT]
-> **Domain Incompatibility:** NSL-KDD feature spaces (connection summary counters), CICIDS2017 (flow statistical timings), and UNSW-NB15 (packet window content) are structurally incompatible. Direct concatenation produces invalid feature spaces. Sentinel IDS maintains independent, schema-validated loaders for each dataset and assesses cross-dataset transfer strictly on normalized common sub-metrics (duration, packet counts, byte rates).
+> **Dataset Incompatibility Notice:** Feature definitions across these datasets are structurally distinct (e.g., NSL-KDD connection counters vs. UNSW-NB15 packet window stats vs. CICIDS2017 flow inter-arrival timings). Direct cross-dataset pooling creates synthetic artifacts. SENTINEL maintains distinct, schema-validated pipelines for each benchmark.
 
 ---
 
-## 4. Honest, Enterprise Evaluation Results Across All Datasets
+## 4. Empirical Benchmark & Evaluation Results
 
-All reported metrics are generated by code execution (`scripts/evaluate_ids.py`, `scripts/compare_ids_models.py`, `scripts/train_dataset_models.py`, and `scripts/cross_dataset_eval.py`). No values are hardcoded or fabricated.
+All reported metrics are generated by code execution (`scripts/train_dataset_models.py`, `scripts/evaluate_ids.py`, `scripts/compare_ids_models.py`, and `scripts/cross_dataset_eval.py`). No values are hardcoded or fabricated.
 
-### 4.1 Independent Dataset Evaluation Summary
+### 4.1 Dataset-Specific Model Performance
 
-Each dataset is trained and evaluated using dedicated, leak-free Scikit-Learn pipelines (`class_weight='balanced_subsample'`, Random State 42) with strict stratified holdouts:
+Each model was trained with `RandomForestClassifier(n_estimators=100, class_weight='balanced_subsample', random_state=42)` on leak-free stratified partitions:
 
-| Dataset | Total Samples | Features | Accuracy | Binary F1 | Binary Recall | False Positive Rate (FPR) | Binary ROC-AUC | Binary PR-AUC | Macro F1 | Balanced Acc | Throughput (samp/s) |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| **NSL-KDD** | 148,517 | 41 | **0.9946** | **0.9945** | 0.9935 | **0.0045** | **0.9998** | **0.9998** | 0.7539 | 0.8492 | 145,210 |
-| **UNSW-NB15** | 82,332 | 42 | **0.8751** | **0.9749** | 0.9596 | **0.0111** | **0.9972** | **0.9978** | 0.7315 | 0.7266 | 148,351 |
-| **CICIDS2017** | 286,467 | 78 | **0.9999** | **0.9999** | 0.9998 | **0.0000** | **1.0000** | **1.0000** | 0.9999 | 0.9999 | 337,023 |
+| Metric | NSL-KDD (Full) | UNSW-NB15 | CICIDS2017 (PortScan Subset) |
+| :--- | :---: | :---: | :---: |
+| **Total Dataset Rows** | 148,517 | 82,332 | 286,467 |
+| **Test Holdout Rows** | 29,704 | 16,467 | 57,294 |
+| **Feature Dimension** | 41 | 42 | 78 |
+| **Accuracy** | **0.9946** | **0.8751** | **0.9999** |
+| **Binary F1-Score** | **0.9945** | **0.9749** | **0.9999** |
+| **Binary Precision** | 0.9952 | 0.9907 | 1.0000 |
+| **Binary Recall** | 0.9938 | 0.9596 | 0.9998 |
+| **False Positive Rate (FPR)** | **0.0045 (0.45%)** | **0.0111 (1.11%)** | **0.0000 (0.00%)** |
+| **ROC-AUC** | **0.9998** | **0.9972** | **1.0000** |
+| **PR-AUC** | **0.9998** | **0.9978** | **1.0000** |
+| **Macro F1-Score** | 0.7539 | 0.7315 | 0.9999 |
+| **Balanced Accuracy** | 0.8826 | 0.7266 | 0.9999 |
+| **Inference Throughput** | ~145,210 samples/s | ~148,351 samples/s | ~337,023 samples/s |
 
-*Note: FPR is calculated strictly as $\text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}$. Zero denominators are guarded.*
+*FPR is calculated strictly as $\text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}$ with zero-division protection.*
 
-### 4.2 Cross-Dataset Transfer Analysis: The Domain Shift Reality
-To test generalization, a classifier was trained on normalized common flow features (`duration`, `src_bytes`, `dst_bytes`, `count`) on NSL-KDD and evaluated across domains:
+#### Essential Benchmark Qualifications:
+1. **Scope of CICIDS2017:** Reported metrics apply strictly to the evaluated Friday PortScan subset. This does not represent performance across the full 8-file multi-attack CICIDS2017 corpus.
+2. **Confidence Estimates:** Random Forest output probabilities are raw tree vote fractions. They represent ensemble agreement, **not** calibrated posterior probabilities, as calibration (e.g., Platt scaling or isotonic regression) is not currently implemented.
+3. **No Cross-Dataset Ranking:** High performance on one dataset cannot be used to rank detection capability against another due to divergent underlying distributions and noise profiles.
 
-| Evaluation Environment | Source | Target | Accuracy | Binary F1 | Transfer Delta |
-|---|---|---|---:|---:|---:|
+---
+
+### 4.2 Cross-Dataset Transfer & Domain Shift Reality
+
+To test real-world transferability, a classifier was trained on NSL-KDD using normalized common features (`duration`, `src_bytes`, `dst_bytes`, `count`) and evaluated directly against UNSW-NB15 (`scripts/cross_dataset_eval.py`):
+
+| Evaluation Environment | Source Dataset | Target Dataset | Accuracy | Binary F1 | Transfer Delta |
+| :--- | :--- | :--- | :---: | :---: | :---: |
 | **In-Domain Baseline** | NSL-KDD | NSL-KDD Test | 0.9786 | 0.9768 | Baseline |
 | **Cross-Domain Transfer** | NSL-KDD | UNSW-NB15 | 0.0215 | 0.0199 | **F1 Drop: -0.9568** |
 
-**Empirical Conclusion:** Direct cross-dataset feature transfer collapses due to fundamental environment and sensor distribution shift (Covariate Shift). High-assurance IDS architectures require dataset-specific feature schemas rather than naive feature concatenation.
-
-### 4.3 NSL-KDD Duplicate-Aware Evaluation (`scripts/evaluate_ids.py`)
-
-| Evaluation Split | Accuracy | Binary F1 | Binary Recall | False Positive Rate (FPR) | Binary ROC-AUC | Binary PR-AUC | Macro F1 | Balanced Acc | U2R Recall | Throughput (samp/s) |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| **Evaluation A (Stratified 80/20 Holdout)** | **0.9953** | 0.9952 | 0.9944 | **0.0036** | **0.9998** | **0.9997** | 0.8734 | 0.8535 | 0.3810 | 147,195 |
-| **Evaluation B (Duplicate-Aware Group Split)** | **0.9959** | 0.9958 | 0.9937 | **0.0019** | **0.9998** | **0.9996** | 0.8900 | 0.8540 | 0.4286 | 171,601 |
-
-### Key Security Findings:
-- **Ultra-Low False Positive Rate:** FPR of $0.0019$ ($0.19\%$) on NSL-KDD and $0.0111$ ($1.11\%$) on UNSW-NB15 prevents alert fatigue in the SOC.
-- **The Minority Class Reality (U2R):** Aggregate accuracy exceeds $99.5\%$, yet User-to-Root (U2R) attacks comprise only $0.04\%$ of samples (52 instances). U2R recall is $38.1\%–42.8\%$. Reporting overall accuracy alone conceals this vulnerability; Sentinel IDS explicitly reports per-class metrics.
-- **Duplicate Leakage Impact:** NSL-KDD contains 610 duplicate groups (1,220 rows) and 116 conflicting predictor groups (identical features with contradictory labels). The duplicate-aware split guarantees identical traffic patterns do not leak across train and test partitions.
+**Empirical Conclusion:** Direct cross-dataset feature transfer fails catastrophically due to environmental and sensor distribution shift (Covariate Shift). High-reliability IDS deployments require sensor-specific baseline calibration rather than naive feature reuse.
 
 ---
 
-## 5. Class Imbalance Handling
+### 4.3 Duplicate-Aware & Leakage-Free NSL-KDD Evaluation
 
-Network intrusion datasets are inherently imbalanced: legitimate traffic and DoS floods dominate, while stealthy intrusion attempts (R2L and U2R) represent a tiny fraction of observations.
+`scripts/evaluate_ids.py` audits record duplication and leakage across train and test partitions:
 
-### Strategy Comparison (`scripts/compare_ids_models.py`):
-1. **Standard Random Forest:** Strong aggregate F1 ($0.995$), but conservative on minority classes.
-2. **Cost-Sensitive / Class-Weighted (`class_weight='balanced'`):** Penalizes misclassification of rare classes proportionally to class frequencies. Increases U2R recall to $>75\%$, but increases false-positive rates from $0.19\%$ to $0.85\%$.
-3. **Random Over-Sampling (ROS):** Resamples minority classes *strictly within training folds* to prevent data leakage into validation or test sets.
+- **Raw Data Duplicates:** NSL-KDD contains 610 duplicate groups (1,220 rows) and 116 conflicting predictor groups (identical feature vectors with conflicting attack labels).
+- **Evaluation Split Strategies:**
+  - **Evaluation A (Stratified 80/20 Holdout):** Preprocessing fitted strictly on train fold.
+  - **Evaluation B (Duplicate-Aware Group Split):** StratifiedGroupKFold ensuring identical feature vectors cannot appear in both train and test partitions.
+
+| Metric | Evaluation A (Stratified Holdout) | Evaluation B (Duplicate-Aware Split) |
+| :--- | :---: | :---: |
+| **Accuracy** | 0.9953 | 0.9959 |
+| **Binary F1-Score** | 0.9952 | 0.9958 |
+| **Binary Recall** | 0.9944 | 0.9937 |
+| **False Positive Rate (FPR)** | 0.0036 (0.36%) | 0.0019 (0.19%) |
+| **ROC-AUC** | 0.9998 | 0.9998 |
+| **PR-AUC** | 0.9997 | 0.9996 |
+| **Macro F1-Score** | 0.8734 | 0.8900 |
+| **Balanced Accuracy** | 0.8535 | 0.8540 |
+| **U2R Minority Class Recall** | 38.10% | 42.86% |
+
+---
+
+### 4.4 Class Imbalance & Minority Attack Evaluation
+
+Intrusion datasets exhibit severe class imbalance: normal traffic and DoS floods constitute over 85% of records, while stealthy intrusion attempts like User-to-Root (U2R) and Remote-to-Local (R2L) represent a fraction of a percent:
+
+- In NSL-KDD test holdouts, U2R comprises only 21 instances ($0.07\%$).
+- Despite an aggregate accuracy of $99.5\%$, unweighted models achieve only $38.1\%–50.0\%$ recall on U2R.
+- Candidate exploration in `scripts/compare_ids_models.py` reveals the security trade-off:
+  - Applying heavy class reweighting (`class_weight='balanced'`) raises U2R recall above $70\%$, but increases false positive rates from $0.19\%$ to $0.85\%$, accelerating SOC alert fatigue.
+  - Balanced Random Forest and Random Over-Sampling (ROS) strictly inside training folds achieved the optimal balance, selecting Extra Trees (`extra_trees`) with validation threshold $0.52$.
+
+---
+
+## 5. Model Drift & Distribution Monitoring
+
+SENTINEL incorporates statistical drift detection (`scripts/drift_monitor.py`) to monitor live traffic against reference baselines:
+
+$$\text{PSI} = \sum_{i=1}^{k} \left( \% \text{Actual}_i - \% \text{Expected}_i \right) \times \ln\left( \frac{\% \text{Actual}_i}{\% \text{Expected}_i} \right)$$
+
+| PSI Score Range | Warning Level | Action Policy |
+| :--- | :--- | :--- |
+| $\text{PSI} < 0.10$ | **NOMINAL** | Standard monitoring; distribution stable. |
+| $0.10 \le \text{PSI} < 0.25$ | **ELEVATED** | Moderate distribution shift; review feature anomalies. |
+| $\text{PSI} \ge 0.25$ | **CRITICAL** | Severe covariate shift; notify SOC team for model audit. |
+
+- **Kolmogorov-Smirnov 2-Sample Test:** Non-parametric test applied across continuous features to identify statistical drift ($p < 0.01$).
+- **Governance Constraint:** Drift alerts signal covariate shift, **not** definitive ground-truth model degradation. Autonomous model replacement is blocked; retraining requires verified, analyst-labeled ground truth.
+
+---
+
+## 6. Telemetry Ingestion & Feature Provenance
+
+### Technical Honesty: Socket-Table Polling vs. Deep Packet Inspection (DPI)
+
+SENTINEL extracts live host connection sessions via `psutil.net_connections()` and OS socket table aggregation (`scripts/flow_engine.py`):
 
 ```text
-Trade-Off Summary:
-High Class Weights -> Higher Rare Attack Recall -> Higher False Alarm Rate (SOC fatigue)
-Standard Weights   -> Minimal False Positive Rate -> May Miss Subtle Privilege Escalation
+Telemetry Source: OS Socket Table (psutil.net_connections)
+Extraction Level: Connection session metadata (5-tuple)
+Packet Inspection: Metadata aggregation (No raw packet payload inspection without kernel drivers)
 ```
 
----
+### Feature Provenance Taxonomy (41 NSL-KDD Features):
 
-## 6. Model Drift & Distribution Monitoring
+| Category | Count | Features | Extraction Methodology |
+| :--- | :---: | :--- | :--- |
+| **Directly Measured** | 6 | `src_ip`, `src_port`, `dst_ip`, `dst_port`, `protocol_type`, `land` | Extracted directly from OS socket connection structures. |
+| **Derived via Aggregation** | 19 | `duration`, `service`, `flag`, `count`, `srv_count`, `same_srv_rate`, `diff_srv_rate`, `dst_host_*` rates | Computed using in-memory rolling time windows and session trackers. |
+| **Unavailable without Kernel Driver** | 20 | `src_bytes`, `dst_bytes`, `logged_in`, `urgent`, `hot`, `num_compromised`, `root_shell`, etc. | Requires kernel-level packet capture (e.g., Npcap / WinPcap). Defaulted to 0 in host socket mode. |
 
-Deploying an ML model into production introduces exposure to distribution shifts over time:
-
-1. **Covariate Shift ($P(X)$ changes):** Network background traffic changes (e.g., migration to cloud providers, new microservices, TLS 1.3 protocol adoption).
-2. **Concept Drift ($P(Y|X)$ changes):** Attack tactics evolve (adversaries alter payload rates or timing to mimic normal traffic).
-3. **Data Quality Drift:** Telemetry pipeline errors, missing socket counters, or unexpected protocol strings.
-
-### Monitoring Mechanism (`scripts/drift_monitor.py`):
-- **Population Stability Index (PSI):** Quantifies distributional distance between production batches and baseline reference:
-  $$\text{PSI} = \sum \left( \% \text{Actual} - \% \text{Expected} \right) \times \ln\left( \frac{\% \text{Actual}}{\% \text{Expected}} \right)$$
-  - $\text{PSI} < 0.10$: **NOMINAL** (No significant shift; normal operation).
-  - $0.10 \le \text{PSI} < 0.25$: **ELEVATED** (Moderate shift; review feature shifts).
-  - $\text{PSI} \ge 0.25$: **CRITICAL** (Severe covariate shift; trigger SOC notification).
-- **Kolmogorov-Smirnov 2-Sample Test:** Non-parametric test identifying continuous feature probability distribution drift ($p < 0.01$).
-- **Retraining Governance Rule:** Drift alerts indicate covariate shift, **not** definitive ground-truth model degradation. Automated model replacement is prevented; re-training requires verified analyst-labelled ground truth.
+> [!NOTE]
+> Socket-table polling provides lightweight, non-intrusive host telemetry without requiring administrative kernel drivers. For full deep packet inspection (DPI) and payload-dependent features, an external packet capture tap (Npcap/libpcap) is required.
 
 ---
 
-## 7. Real-Time Telemetry & SOC Alert Architecture
+## 7. SOC Alerting Philosophy & Action Policy
 
-### Architectural Telemetry Delineation
-- **Live OS Socket Telemetry (`agent.py`):** Host-level throughput counters (bytes/s, packet rates, socket counts) provide real-time endpoint visibility.
-- **Genuine Live Connection Flow Engine (`scripts/flow_engine.py` & `/live-flows` API):** Extracts real 5-tuple TCP/UDP connection sessions (`src_ip`, `dst_ip`, `dst_port`, `protocol_type`, `service`, `flag`, `count`, `same_srv_rate`) directly from active OS socket tables and scores them through the trained ML pipeline in real time.
-- **Batch Flow Ingestion (`CSV Batch Analysis`):** Processes full 41-feature connection records or Windows PC activity logs with complete feature attribution.
-- **Injected Attack Simulations:** Clearly tagged as `origin: "synthetic_attack_demo"` to ensure drill events are never confused with real incidents.
+SENTINEL enforces a mandatory **`ALERT_ONLY_NO_AUTO_BLOCK`** policy across all operational surfaces.
+
+### Why Auto-Blocking is Prohibited in Production:
+1. **Collateral Disruption:** A $0.2\%$ false positive rate equates to dropping 2 legitimate connections per 1,000 requests. On a service processing 100,000 requests per minute, auto-blocking would drop 200 legitimate customer sessions every minute.
+2. **Denial-of-Service Weaponization:** Attackers can spoof legitimate gateway, DNS, or domain controller IP addresses in scan packets, causing an auto-blocking IDS to inadvertently take down enterprise core services.
+3. **Analyst-in-the-Loop:** SENTINEL acts as an intelligent co-pilot, generating structured incident context and recommended playbooks so human analysts can verify intent before enacting firewall or routing modifications.
 
 ### Structured SOC Alert Schema (`/alerts` API):
 ```json
@@ -183,13 +265,6 @@ Deploying an ML model into production introduces exposure to distribution shifts
   "confidence": 91.4,
   "confidence_type": "uncalibrated_random_forest_vote_fraction",
   "calibrated_probability": 0.914,
-  "risk_assignment_rule": "HIGH: confidence >= 85% and attack != Normal",
-  "model_provenance": {
-    "model_name": "RandomForestClassifier (150 trees)",
-    "dataset": "NSL-KDD",
-    "artifact": "model.pkl",
-    "feature_count": 41
-  },
   "source_ip": "192.168.1.105",
   "destination_port": 80,
   "action_policy": "ALERT_ONLY_NO_AUTO_BLOCK",
@@ -199,67 +274,176 @@ Deploying an ML model into production introduces exposure to distribution shifts
   ],
   "causal_attribution_note": "Observed indicators reflect threshold excursions in monitored telemetry; individual feature importance is not a causal attribution without SHAP/LIME.",
   "recommended_analyst_actions": [
-    "Inspect high-volume egress/ingress flows to identify saturated sockets and bandwidth spikes.",
-    "Review top source IP addresses and determine if traffic is distributed (DDoS) or single-source.",
+    "Inspect high-volume ingress flows to identify saturated sockets.",
+    "Review top source IP addresses and check for distributed botnet signatures.",
     "Apply edge rate-limiting or upstream firewall scrubbing rules if confirmed malicious.",
-    "Verify server process memory/socket backlog queue exhaustion. (NOTE: SOC Alert only; no auto-block enforced)."
+    "Verify host socket backlog queue exhaustion. (NOTE: SOC Alert only; no auto-block enforced)."
   ],
   "explanation": "ML model detected DoS pattern with 91.4% confidence. Generated as alert for human analysts (auto-blocking disabled by design)."
 }
 ```
 
-### Live Socket Feature Provenance Taxonomy (`/live-flows` API)
-- **Measured (6 features):** `src_ip`, `src_port`, `dst_ip`, `dst_port`, `protocol_type`, `land`.
-- **Derived (19 features):** `duration`, `service`, `flag`, `count`, `srv_count`, `same_srv_rate`, `diff_srv_rate`, `dst_host_*` sliding-window ratios.
-- **Unavailable without Kernel Driver (20 features):** Payload bytes (`src_bytes`, `dst_bytes`), application logins (`logged_in`), deep-packet flags (`urgent`, `hot`, `num_compromised`, etc.) default to 0 without Npcap/WinPcap kernel capture drivers.
+---
+
+## 8. Cyber-HUD Dashboard & REST API Reference
+
+The SENTINEL web interface provides real-time situational awareness with a dark cybersecurity aesthetic.
+
+### REST Endpoints Summary
+
+| Endpoint | Method | Description |
+| :--- | :---: | :--- |
+| **`/`** | `GET` | Cyber-HUD Command Center dashboard with live charts, flow metrics, and alert logs. |
+| **`/about`** | `GET` | Architecture overview, benchmark comparison tables, and dataset transfer analysis. |
+| **`/health`** | `GET` | Host system telemetry, CPU, memory, socket status, and active model state. |
+| **`/metrics`** | `GET` | Real-time traffic rate metrics (inbound/outbound bytes, packet rates, top IPs/ports). |
+| **`/alerts`** | `GET` | Structured SOC alert feed containing recent security events and analyst recommendations. |
+| **`/drift-status`** | `GET` | Feature distribution drift report, Population Stability Index (PSI), and warning level. |
+| **`/live-flows`** | `GET` | Active 5-tuple OS socket sessions scored by the trained ML pipeline in real time. |
+| **`/api/benchmarks`** | `GET` | Structured JSON containing benchmark metrics across NSL-KDD, UNSW-NB15, and CICIDS2017. |
+| **`/analyze-csv`** | `POST` | Batch evaluation endpoint accepting uploaded CSV network flow captures (up to 100k rows). |
+| **`/toggle-demo`** | `POST` | Toggles simulated attack drill mode for operator training. |
+| **`/reset-stats`** | `POST` | Resets sensor counters and incident history to baseline. |
 
 ---
 
-## 8. Quickstart & Verification
+## 9. Installation & Windows Quickstart
 
 ### Prerequisites
-- Python 3.10+
-- Modern Web Browser (Chrome, Firefox, Edge, Safari)
+- Windows 10/11 (or Linux / macOS)
+- Python 3.10, 3.11, or 3.12
+- Git
 
-### 1. Installation
+### 1. Clone the Repository
 ```powershell
 git clone https://github.com/Sanchitk99/intrusion-detection.git
 cd intrusion-detection
+```
+
+### 2. Set Up Virtual Environment
+```powershell
+# Create virtual environment
+python -m venv venv
+
+# Activate on Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# Activate on Windows (Command Prompt)
+.\venv\Scripts\activate.bat
+```
+
+### 3. Install Dependencies
+```powershell
 pip install -r requirements.txt
 ```
 
-### 2. Run Comprehensive Unit Test Suite (22 Tests)
+### 4. Run the Unit Test Suite (22 Tests)
 ```powershell
 python -m unittest discover -s scripts -p "test_*.py" -v
 ```
-*Tests evaluate pipeline fit containment, duplicate-group isolation, metric formulas, ROC-AUC calculations, dataset loaders, flow engine, feature provenance schema, cross-dataset transfer, and drift monitoring.*
 
-### 3. Reproduce Multi-Dataset Training & Evaluation
-```powershell
-# Train and evaluate all 3 dataset-specific models
-python scripts/train_dataset_models.py --dataset all
-
-# Run empirical cross-dataset domain transfer experiment
-python scripts/cross_dataset_eval.py
-
-# Run NSL-KDD duplicate-aware baseline evaluation
-python scripts/evaluate_ids.py
-```
-*Artifacts are saved to `artifacts/models/` and independent reports to `reports/`.*
-
-### 4. Launch Cyber-HUD Dashboard & Alert Core
+### 5. Launch the Application
 ```powershell
 python app.py
 ```
 Open **`http://127.0.0.1:5000`** in your browser.
-- Live flow scoring: **`http://127.0.0.1:5000/live-flows`**
-- Consolidated benchmarks API: **`http://127.0.0.1:5000/api/benchmarks`**
 
 ---
 
-## 9. SOC Alerting Philosophy: Why No Auto-Blocking?
+## 10. Testing & Reproducibility
 
-In high-assurance enterprise security, ML-based detection systems must not unilaterally drop packets or terminate processes:
-1. **Business Disruption Risk:** A $0.2\%$ false positive rate equates to dropping 2 legitimate connections per 1,000 requests. On a web service handling 100,000 requests per minute, auto-blocking would drop 200 legitimate customer sessions every minute.
-2. **Adversarial Exploitation:** Attackers can spoof legitimate internal IP addresses in attack packets, tricking an auto-blocking IDS into blacklisting domain controllers, DNS servers, or database backends.
-3. **Analyst Augmentation:** Sentinel IDS operates as an intelligent co-pilot, surfacing enriched alerts with confidence scores, anomaly indicators, and recommended playbooks so human analysts can verify intent before taking containment action.
+The repository includes 22 automated unit tests across 6 dedicated test modules:
+
+```powershell
+python -m unittest discover -s scripts -p "test_*.py" -v
+```
+
+### Test Coverage Verification:
+- **`scripts/test_compare_ids_models.py`:** Verifies leak-free model comparison, cross-validation candidate scoring, threshold selection, and normal-class negative assignment.
+- **`scripts/test_cross_dataset_eval.py`:** Tests cross-dataset feature alignment, transfer delta calculations, and summary report generation.
+- **`scripts/test_dataset_loaders.py`:** Validates catalog provenance, schema definitions, label canonicalization, and preprocessing isolation.
+- **`scripts/test_drift_monitor.py`:** Validates Population Stability Index (PSI) calculation under identical and shifted distributions, data quality checks, and categorical novelty alerts.
+- **`scripts/test_evaluate_ids.py`:** Tests partition overlap detection, duplicate group isolation, conflicting predictor row identification, and metric derivation from raw predictions.
+- **`scripts/test_flow_engine.py`:** Tests 5-tuple session aggregation, TCP state mapping, port-to-service translation, feature provenance schema, and live flow classification.
+
+---
+
+## 11. Project Structure & Storage Architecture
+
+```text
+intrusion-detection/
+├── artifacts/
+│   └── models/
+│       ├── nsl_kdd_pipeline.joblib                # 26.18 MB (Tracked)
+│       ├── nsl_kdd_metadata.json
+│       ├── unsw_nb15_pipeline_compressed.joblib   # 27.62 MB (Tracked, zlib compressed)
+│       ├── unsw_nb15_metadata.json
+│       ├── cicids2017_pipeline.joblib             # 0.17 MB (Tracked)
+│       └── cicids2017_metadata.json
+├── data/                                          # Git-ignored (Local raw datasets)
+│   ├── nsl_kdd.csv
+│   ├── unsw_nb15.csv
+│   └── cicids2017.csv
+├── reports/
+│   ├── cicids2017_evaluation/                     # Metrics JSON & Markdown summaries
+│   ├── cross_dataset_evaluation/                  # Cross-dataset transfer analysis
+│   ├── ids_evaluation/                            # Duplicate analysis & holdout metrics
+│   ├── ids_model_comparison/                      # Candidate comparison & compressed models
+│   ├── nsl_kdd_evaluation/                        # NSL-KDD benchmark metrics
+│   ├── unsw_nb15_evaluation/                      # UNSW-NB15 benchmark metrics
+│   └── model_compression_audit.json               # 100% equivalence audit report
+├── scripts/
+│   ├── compare_ids_models.py                      # Multi-candidate comparison & selection
+│   ├── cross_dataset_eval.py                      # Empirical domain transfer evaluation
+│   ├── dataset_loaders.py                         # Standardized dataset loaders & schemas
+│   ├── drift_monitor.py                           # PSI & Kolmogorov-Smirnov drift engine
+│   ├── evaluate_ids.py                            # Duplicate-aware evaluation script
+│   ├── flow_engine.py                             # Live OS socket table flow engine
+│   ├── manage_model_storage.py                    # Lossless compression & verification utility
+│   ├── test_*.py                                  # 22 automated unit test modules
+│   └── train_dataset_models.py                    # Multi-dataset training pipeline
+├── static/
+│   ├── logo.svg / logo.png                        # SENTINEL branding assets
+│   └── favicon.svg / favicon.png                  # Shield tab icons
+├── templates/
+│   ├── dashboard.html                             # Cyber-HUD Command Center UI
+│   └── about.html                                 # System architecture & benchmarks UI
+├── agent.py                                       # Host telemetry collector & scoring agent
+├── app.py                                         # Flask application server & REST routes
+├── model.pkl                                      # Production model artifact (37.58 MB)
+└── requirements.txt                               # Project dependencies
+```
+
+### Model Storage & GitHub Compliance
+To comply with GitHub's 100 MB per-file threshold without loss of fidelity:
+- Large model artifacts were compressed using lossless Joblib compression (`zlib`, level 6), reducing sizes by **~76–78%** (e.g., UNSW-NB15: 116.05 MB $\rightarrow$ **27.62 MB**).
+- Equivalence was validated across 200 representative samples via [`scripts/manage_model_storage.py`](file:///d:/Project/intrusion-detection/scripts/manage_model_storage.py), confirming **100.0% identical class predictions and $0.0$ maximum probability discrepancy**.
+- Original uncompressed models and local backups are preserved in `backups/original_models/` and protected by `.gitignore`.
+
+---
+
+## 12. Known Limitations & Engineering Constraints
+
+In accordance with principles of technical transparency:
+
+1. **Telemetry Scope:** Host socket-table polling captures connection session metadata, not full packet payloads. Payload byte rates and deep-packet flags require external kernel drivers (Npcap/WinPcap).
+2. **Domain Transfer Collapse:** Machine learning models trained on one dataset do not transfer reliably to distinct network topologies without domain adaptation.
+3. **Minority Class Sensitivity:** High aggregate accuracy ($>99\%$) masks lower sensitivity on rare privilege escalation attacks (e.g., U2R recall is $38.1\%–50.0\%$).
+4. **Uncalibrated Confidence Scores:** Tree vote fractions represent model consensus rather than true statistical event probabilities.
+5. **No Guaranteed Zero-Day Defense:** Anomaly detection identifies statistical deviations from baseline behavior; novel attacks that mimic legitimate connection patterns may evade detection.
+
+---
+
+## 13. Realistic Future Improvements
+
+- **Kernel Driver Capture:** Integrate optional Npcap/libpcap packet capture binding for genuine payload byte inspection and TCP flag timing.
+- **Probability Calibration:** Implement Platt scaling (logistic sigmoid) or Isotonic Regression on held-out validation partitions to convert raw vote fractions into calibrated posterior probabilities.
+- **Explainable AI (XAI):** Integrate SHAP (SHapley Additive exPlanations) or TreeSHAP for real-time feature attribution directly inside generated SOC alerts.
+- **Streaming Alert Transport:** Transition `/live-flows` and `/alerts` from HTTP polling to Server-Sent Events (SSE) or WebSockets for reduced latency.
+
+---
+
+## 14. License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
+See the `LICENSE` file for details.

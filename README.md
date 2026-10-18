@@ -267,7 +267,6 @@ SENTINEL enforces a mandatory **`ALERT_ONLY_NO_AUTO_BLOCK`** policy across all o
   "risk_level": "HIGH",
   "confidence": 91.4,
   "confidence_type": "uncalibrated_random_forest_vote_fraction",
-  "calibrated_probability": 0.914,
   "source_ip": "192.168.1.105",
   "destination_port": 80,
   "action_policy": "ALERT_ONLY_NO_AUTO_BLOCK",
@@ -285,6 +284,8 @@ SENTINEL enforces a mandatory **`ALERT_ONLY_NO_AUTO_BLOCK`** policy across all o
   "explanation": "ML model detected DoS pattern with 91.4% confidence. Generated as alert for human analysts (auto-blocking disabled by design)."
 }
 ```
+
+*Note: The `confidence` field reflects an uncalibrated Random Forest tree vote fraction (ensemble consensus percentage), not a calibrated posterior probability.*
 
 ---
 

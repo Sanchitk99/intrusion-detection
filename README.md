@@ -194,11 +194,11 @@ To test real-world transferability, a classifier was trained on NSL-KDD using no
 
 Intrusion datasets exhibit severe class imbalance: normal traffic and DoS floods constitute over 85% of records, while stealthy intrusion attempts like User-to-Root (U2R) and Remote-to-Local (R2L) represent a fraction of a percent:
 
-- In NSL-KDD test holdouts, U2R comprises only 21 instances ($0.07\%$).
-- Despite an aggregate accuracy of $99.5\%$, unweighted models achieve only $38.1\%–50.0\%$ recall on U2R.
+- In NSL-KDD test holdouts, U2R comprises only 21 instances (0.07%).
+- Despite an aggregate accuracy of 99.5%, unweighted models achieve only 38.1%–50.0% recall on U2R.
 - Candidate exploration in `scripts/compare_ids_models.py` reveals the security trade-off:
-  - Applying heavy class reweighting (`class_weight='balanced'`) raises U2R recall above $70\%$, but increases false positive rates from $0.19\%$ to $0.85\%$, accelerating SOC alert fatigue.
-  - Balanced Random Forest and Random Over-Sampling (ROS) strictly inside training folds achieved the optimal balance, selecting Extra Trees (`extra_trees`) with validation threshold $0.52$.
+  - Applying heavy class reweighting (`class_weight='balanced'`) raises U2R recall above 70%, but increases false positive rates from 0.19% to 0.85%, accelerating SOC alert fatigue.
+  - Balanced Random Forest and Random Over-Sampling (ROS) strictly inside training folds achieved the optimal balance, selecting Extra Trees (`extra_trees`) with validation threshold 0.52.
 
 ---
 
@@ -206,13 +206,16 @@ Intrusion datasets exhibit severe class imbalance: normal traffic and DoS floods
 
 SENTINEL incorporates statistical drift detection (`scripts/drift_monitor.py`) to monitor live traffic against reference baselines:
 
-$$\text{PSI} = \sum_{i=1}^{k} \left( \% \text{Actual}_i - \% \text{Expected}_i \right) \times \ln\left( \frac{\% \text{Actual}_i}{\% \text{Expected}_i} \right)$$
+$$\text{PSI} = \sum_{i=1}^{k} (P_i - Q_i) \times \ln\left( \frac{P_i}{Q_i} \right)$$
+
+*Where $P_i$ is the actual batch distribution percentage, $Q_i$ is the expected reference baseline percentage for bin $i$, and $k$ is the number of bins.*  
+*Text formula:* `PSI = Σ [ (Actual_i - Expected_i) × ln(Actual_i / Expected_i) ]`
 
 | PSI Score Range | Warning Level | Action Policy |
 | :--- | :--- | :--- |
-| $\text{PSI} < 0.10$ | **NOMINAL** | Standard monitoring; distribution stable. |
-| $0.10 \le \text{PSI} < 0.25$ | **ELEVATED** | Moderate distribution shift; review feature anomalies. |
-| $\text{PSI} \ge 0.25$ | **CRITICAL** | Severe covariate shift; notify SOC team for model audit. |
+| PSI < 0.10 | **NOMINAL** | Standard monitoring; distribution stable. |
+| 0.10 ≤ PSI < 0.25 | **ELEVATED** | Moderate distribution shift; review feature anomalies. |
+| PSI ≥ 0.25 | **CRITICAL** | Severe covariate shift; notify SOC team for model audit. |
 
 - **Kolmogorov-Smirnov 2-Sample Test:** Non-parametric test applied across continuous features to identify statistical drift ($p < 0.01$).
 - **Governance Constraint:** Drift alerts signal covariate shift, **not** definitive ground-truth model degradation. Autonomous model replacement is blocked; retraining requires verified, analyst-labeled ground truth.
@@ -249,7 +252,7 @@ Packet Inspection: Metadata aggregation (No raw packet payload inspection withou
 SENTINEL enforces a mandatory **`ALERT_ONLY_NO_AUTO_BLOCK`** policy across all operational surfaces.
 
 ### Why Auto-Blocking is Prohibited in Production:
-1. **Collateral Disruption:** A $0.2\%$ false positive rate equates to dropping 2 legitimate connections per 1,000 requests. On a service processing 100,000 requests per minute, auto-blocking would drop 200 legitimate customer sessions every minute.
+1. **Collateral Disruption:** A 0.2% false positive rate equates to dropping 2 legitimate connections per 1,000 requests. On a service processing 100,000 requests per minute, auto-blocking would drop 200 legitimate customer sessions every minute.
 2. **Denial-of-Service Weaponization:** Attackers can spoof legitimate gateway, DNS, or domain controller IP addresses in scan packets, causing an auto-blocking IDS to inadvertently take down enterprise core services.
 3. **Analyst-in-the-Loop:** SENTINEL acts as an intelligent co-pilot, generating structured incident context and recommended playbooks so human analysts can verify intent before enacting firewall or routing modifications.
 
@@ -416,8 +419,8 @@ intrusion-detection/
 
 ### Model Storage & GitHub Compliance
 To comply with GitHub's 100 MB per-file threshold without loss of fidelity:
-- Oversized model artifacts were compressed using lossless Joblib compression (`zlib`, level 6), reducing sizes by **~76–78%** (e.g., UNSW-NB15: 116.05 MB $\rightarrow$ **27.62 MB**).
-- Equivalence was validated across 200 representative samples via [`scripts/manage_model_storage.py`](scripts/manage_model_storage.py), confirming **100.0% identical class predictions and $0.0$ maximum probability discrepancy** (documented in [`reports/model_compression_audit.json`](reports/model_compression_audit.json)).
+- Oversized model artifacts were compressed using lossless Joblib compression (`zlib`, level 6), reducing sizes by **~76–78%** (e.g., UNSW-NB15: 116.05 MB → **27.62 MB**).
+- Equivalence was validated across 200 representative samples via [`scripts/manage_model_storage.py`](scripts/manage_model_storage.py), confirming **100.0% identical class predictions and 0.0 maximum probability discrepancy** (documented in [`reports/model_compression_audit.json`](reports/model_compression_audit.json)).
 - Tracked compressed artifacts (`*_compressed.joblib`) are fully functional and load transparently with standard `joblib.load()`.
 - Original uncompressed models and local backups are preserved in `backups/original_models/` and protected by `.gitignore`.
 - Raw benchmark CSVs in `data/` exceed GitHub's repository quotas and are excluded from Git tracking; training scripts run on local dataset copies.
@@ -430,7 +433,7 @@ In accordance with principles of technical transparency:
 
 1. **Telemetry Scope:** Host socket-table polling captures connection session metadata, not full packet payloads. Payload byte rates and deep-packet flags require external kernel drivers (Npcap/WinPcap).
 2. **Domain Transfer Collapse:** Machine learning models trained on one dataset do not transfer reliably to distinct network topologies without domain adaptation.
-3. **Minority Class Sensitivity:** High aggregate accuracy ($>99\%$) masks lower sensitivity on rare privilege escalation attacks (e.g., U2R recall is $38.1\%–50.0\%$).
+3. **Minority Class Sensitivity:** High aggregate accuracy (>99%) masks lower sensitivity on rare privilege escalation attacks (e.g., U2R recall is 38.1%–50.0%).
 4. **Uncalibrated Confidence Scores:** Tree vote fractions represent model consensus rather than true statistical event probabilities.
 5. **No Guaranteed Zero-Day Defense:** Anomaly detection identifies statistical deviations from baseline behavior; novel attacks that mimic legitimate connection patterns may evade detection.
 

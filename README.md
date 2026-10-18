@@ -39,7 +39,7 @@
 
 ## 1. Executive Summary & Challenge Context
 
-Signature-based Intrusion Detection Systems (e.g., Snort, Suricata, Zeek) rely on predefined byte sequences, regex rules, and known hash catalogs. While signature engines excel at deterministic detection of known threats with near-zero false positives, they are fundamentally vulnerable to:
+Signature-based Intrusion Detection Systems (e.g., Snort, Suricata, Zeek) rely on predefined byte sequences, regex rules, and known hash catalogs. While signature engines excel at deterministic detection of known threats with near-zero false positives, they are systematically vulnerable to:
 
 1. **Zero-Day Vulnerabilities & Novel Variants:** Uncataloged exploits lacking vendor signatures.
 2. **Polymorphic / Obfuscated Payloads:** Payloads that alter byte sequences while preserving malicious execution semantics.
@@ -337,7 +337,7 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-### 4. Run the Unit Test Suite (22 Tests)
+### 4. Run the Unit Test Suite
 ```powershell
 python -m unittest discover -s scripts -p "test_*.py" -v
 ```
@@ -374,11 +374,11 @@ python -m unittest discover -s scripts -p "test_*.py" -v
 intrusion-detection/
 ├── artifacts/
 │   └── models/
-│       ├── nsl_kdd_pipeline.joblib                # 26.18 MB (Tracked)
+│       ├── nsl_kdd_pipeline.joblib                # 26.18 MB (Tracked in Git)
 │       ├── nsl_kdd_metadata.json
-│       ├── unsw_nb15_pipeline_compressed.joblib   # 27.62 MB (Tracked, zlib compressed)
+│       ├── unsw_nb15_pipeline_compressed.joblib   # 27.62 MB (Tracked in Git, zlib level 6)
 │       ├── unsw_nb15_metadata.json
-│       ├── cicids2017_pipeline.joblib             # 0.17 MB (Tracked)
+│       ├── cicids2017_pipeline.joblib             # 0.81 MB (Tracked in Git)
 │       └── cicids2017_metadata.json
 ├── data/                                          # Git-ignored (Local raw datasets)
 │   ├── nsl_kdd.csv
@@ -410,15 +410,17 @@ intrusion-detection/
 │   └── about.html                                 # System architecture & benchmarks UI
 ├── agent.py                                       # Host telemetry collector & scoring agent
 ├── app.py                                         # Flask application server & REST routes
-├── model.pkl                                      # Production model artifact (37.58 MB)
+├── model.pkl                                      # Production model artifact (37.58 MB, Tracked)
 └── requirements.txt                               # Project dependencies
 ```
 
 ### Model Storage & GitHub Compliance
 To comply with GitHub's 100 MB per-file threshold without loss of fidelity:
-- Large model artifacts were compressed using lossless Joblib compression (`zlib`, level 6), reducing sizes by **~76–78%** (e.g., UNSW-NB15: 116.05 MB $\rightarrow$ **27.62 MB**).
-- Equivalence was validated across 200 representative samples via [`scripts/manage_model_storage.py`](file:///d:/Project/intrusion-detection/scripts/manage_model_storage.py), confirming **100.0% identical class predictions and $0.0$ maximum probability discrepancy**.
+- Oversized model artifacts were compressed using lossless Joblib compression (`zlib`, level 6), reducing sizes by **~76–78%** (e.g., UNSW-NB15: 116.05 MB $\rightarrow$ **27.62 MB**).
+- Equivalence was validated across 200 representative samples via [`scripts/manage_model_storage.py`](scripts/manage_model_storage.py), confirming **100.0% identical class predictions and $0.0$ maximum probability discrepancy** (documented in [`reports/model_compression_audit.json`](reports/model_compression_audit.json)).
+- Tracked compressed artifacts (`*_compressed.joblib`) are fully functional and load transparently with standard `joblib.load()`.
 - Original uncompressed models and local backups are preserved in `backups/original_models/` and protected by `.gitignore`.
+- Raw benchmark CSVs in `data/` exceed GitHub's repository quotas and are excluded from Git tracking; training scripts run on local dataset copies.
 
 ---
 
@@ -447,98 +449,3 @@ In accordance with principles of technical transparency:
 
 This project is licensed under the [Apache License 2.0](LICENSE).
 See the `LICENSE` file for details.
-
-```powershell
-python -m unittest discover -s scripts -p "test_*.py" -v
-```
-
-### Test Coverage Verification:
-- **`scripts/test_compare_ids_models.py`:** Verifies leak-free model comparison, cross-validation candidate scoring, threshold selection, and normal-class negative assignment.
-- **`scripts/test_cross_dataset_eval.py`:** Tests cross-dataset feature alignment, transfer delta calculations, and summary report generation.
-- **`scripts/test_dataset_loaders.py`:** Validates catalog provenance, schema definitions, label canonicalization, and preprocessing isolation.
-- **`scripts/test_drift_monitor.py`:** Validates Population Stability Index (PSI) calculation under identical and shifted distributions, data quality checks, and categorical novelty alerts.
-- **`scripts/test_evaluate_ids.py`:** Tests partition overlap detection, duplicate group isolation, conflicting predictor row identification, and metric derivation from raw predictions.
-- **`scripts/test_flow_engine.py`:** Tests 5-tuple session aggregation, TCP state mapping, port-to-service translation, feature provenance schema, and live flow classification.
-
----
-
-## 11. Project Structure & Storage Architecture
-
-```text
-intrusion-detection/
-├── artifacts/
-│   └── models/
-│       ├── nsl_kdd_pipeline.joblib                # 26.18 MB (Tracked)
-│       ├── nsl_kdd_metadata.json
-│       ├── unsw_nb15_pipeline_compressed.joblib   # 27.62 MB (Tracked, zlib compressed)
-│       ├── unsw_nb15_metadata.json
-│       ├── cicids2017_pipeline.joblib             # 0.17 MB (Tracked)
-│       └── cicids2017_metadata.json
-├── data/                                          # Git-ignored (Local raw datasets)
-│   ├── nsl_kdd.csv
-│   ├── unsw_nb15.csv
-│   └── cicids2017.csv
-├── reports/
-│   ├── cicids2017_evaluation/                     # Metrics JSON & Markdown summaries
-│   ├── cross_dataset_evaluation/                  # Cross-dataset transfer analysis
-│   ├── ids_evaluation/                            # Duplicate analysis & holdout metrics
-│   ├── ids_model_comparison/                      # Candidate comparison & compressed models
-│   ├── nsl_kdd_evaluation/                        # NSL-KDD benchmark metrics
-│   ├── unsw_nb15_evaluation/                      # UNSW-NB15 benchmark metrics
-│   └── model_compression_audit.json               # 100% equivalence audit report
-├── scripts/
-│   ├── compare_ids_models.py                      # Multi-candidate comparison & selection
-│   ├── cross_dataset_eval.py                      # Empirical domain transfer evaluation
-│   ├── dataset_loaders.py                         # Standardized dataset loaders & schemas
-│   ├── drift_monitor.py                           # PSI & Kolmogorov-Smirnov drift engine
-│   ├── evaluate_ids.py                            # Duplicate-aware evaluation script
-│   ├── flow_engine.py                             # Live OS socket table flow engine
-│   ├── manage_model_storage.py                    # Lossless compression & verification utility
-│   ├── test_*.py                                  # 22 automated unit test modules
-│   └── train_dataset_models.py                    # Multi-dataset training pipeline
-├── static/
-│   ├── logo.svg / logo.png                        # SENTINEL branding assets
-│   └── favicon.svg / favicon.png                  # Shield tab icons
-├── templates/
-│   ├── dashboard.html                             # Cyber-HUD Command Center UI
-│   └── about.html                                 # System architecture & benchmarks UI
-├── agent.py                                       # Host telemetry collector & scoring agent
-├── app.py                                         # Flask application server & REST routes
-├── model.pkl                                      # Production model artifact (37.58 MB)
-└── requirements.txt                               # Project dependencies
-```
-
-### Model Storage & GitHub Compliance
-To comply with GitHub's 100 MB per-file threshold without loss of fidelity:
-- Large model artifacts were compressed using lossless Joblib compression (`zlib`, level 6), reducing sizes by **~76–78%** (e.g., UNSW-NB15: 116.05 MB $\rightarrow$ **27.62 MB**).
-- Equivalence was validated across 200 representative samples via [`scripts/manage_model_storage.py`](file:///d:/Project/intrusion-detection/scripts/manage_model_storage.py), confirming **100.0% identical class predictions and $0.0$ maximum probability discrepancy**.
-- Original uncompressed models and local backups are preserved in `backups/original_models/` and protected by `.gitignore`.
-
----
-
-## 12. Known Limitations & Engineering Constraints
-
-In accordance with principles of technical transparency:
-
-1. **Telemetry Scope:** Host socket-table polling captures connection session metadata, not full packet payloads. Payload byte rates and deep-packet flags require external kernel drivers (Npcap/WinPcap).
-2. **Domain Transfer Collapse:** Machine learning models trained on one dataset do not transfer reliably to distinct network topologies without domain adaptation.
-3. **Minority Class Sensitivity:** High aggregate accuracy ($>99\%$) masks lower sensitivity on rare privilege escalation attacks (e.g., U2R recall is $38.1\%–50.0\%$).
-4. **Uncalibrated Confidence Scores:** Tree vote fractions represent model consensus rather than true statistical event probabilities.
-5. **No Guaranteed Zero-Day Defense:** Anomaly detection identifies statistical deviations from baseline behavior; novel attacks that mimic legitimate connection patterns may evade detection.
-
----
-
-## 13. Realistic Future Improvements
-
-- **Kernel Driver Capture:** Integrate optional Npcap/libpcap packet capture binding for genuine payload byte inspection and TCP flag timing.
-- **Probability Calibration:** Implement Platt scaling (logistic sigmoid) or Isotonic Regression on held-out validation partitions to convert raw vote fractions into calibrated posterior probabilities.
-- **Explainable AI (XAI):** Integrate SHAP (SHapley Additive exPlanations) or TreeSHAP for real-time feature attribution directly inside generated SOC alerts.
-- **Streaming Alert Transport:** Transition `/live-flows` and `/alerts` from HTTP polling to Server-Sent Events (SSE) or WebSockets for reduced latency.
-
----
-
-## 14. License
-
-This project is licensed under the [Apache License 2.0](LICENSE).
-See the `LICENSE` file for details.
-

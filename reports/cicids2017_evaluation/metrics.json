@@ -1,0 +1,98 @@
+{
+  "binary_metrics": {
+    "accuracy": 0.9998952769923553,
+    "confusion_matrix": {
+      "fn": 6,
+      "fp": 0,
+      "tn": 25508,
+      "tp": 31780
+    },
+    "f1": 0.9999056099172514,
+    "false_negative_rate": 0.00018876234820361165,
+    "false_positive_rate": 0.0,
+    "pr_auc": 0.9999999663554946,
+    "precision": 1.0,
+    "recall": 0.9998112376517964,
+    "roc_auc": 0.9999999580659673
+  },
+  "dataset": "cicids2017",
+  "multiclass_metrics": {
+    "accuracy": 0.9998952769923553,
+    "balanced_accuracy": 0.9999056188258981,
+    "confusion_matrix": [
+      [
+        25508,
+        0
+      ],
+      [
+        6,
+        31780
+      ]
+    ],
+    "labels": [
+      "Normal",
+      "Probe"
+    ],
+    "macro_f1": 0.9998940067931285,
+    "per_class": {
+      "Normal": {
+        "f1-score": 0.9998824036690055,
+        "precision": 0.9997648349925531,
+        "recall": 1.0,
+        "support": 25508.0
+      },
+      "Probe": {
+        "f1-score": 0.9999056099172514,
+        "precision": 1.0,
+        "recall": 0.9998112376517964,
+        "support": 31786.0
+      },
+      "accuracy": 0.9998952769923553,
+      "macro avg": {
+        "f1-score": 0.9998940067931285,
+        "precision": 0.9998824174962766,
+        "recall": 0.9999056188258981,
+        "support": 57294.0
+      },
+      "weighted avg": {
+        "f1-score": 0.9998952782074694,
+        "precision": 0.9998953016195421,
+        "recall": 0.9998952769923553,
+        "support": 57294.0
+      }
+    },
+    "weighted_f1": 0.9998952782074694
+  },
+  "provenance": {
+    "binary_positive_definition": "Any label other than 'BENIGN' / 'Normal'.",
+    "description": "78-84 statistical flow features computed over forward/backward packet distributions.",
+    "expected_filenames": [
+      "cicids2017.csv",
+      "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+      "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+      "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv"
+    ],
+    "licensing": "Open research license with attribution to Canadian Institute for Cybersecurity.",
+    "multiclass_categories": [
+      "Normal",
+      "DoS",
+      "Probe",
+      "R2L",
+      "U2R",
+      "Other"
+    ],
+    "name": "CICIDS2017",
+    "provenance": "Canadian Institute for Cybersecurity (CIC), UNB (Sharafaldin et al., 2018). Captured across 5 days (Monday-Friday) containing benign background traffic and modern network attacks extracted with CICFlowMeter.",
+    "target_column": "label"
+  },
+  "samples": {
+    "test_rows": 57294,
+    "total_dataset_rows": 286467,
+    "train_rows": 80000
+  },
+  "timing": {
+    "inference_throughput_samples_per_sec": 337023.5,
+    "inference_time_seconds": 0.17,
+    "training_time_seconds": 2.008
+  }
+}

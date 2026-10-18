@@ -1,7 +1,29 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment and secret files
+.env
+.env.*
+*.env
+
+# Local backups of original trained models (retained locally, excluded from Git)
+backups/
+
+# Raw datasets (retained locally, excluded from Git)
+data/
+*.pcap_ISCX.csv
+*.pcap
 KDDTrain+.txt
 KDDTest+.txt
-dataset
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+dataset/
+
+# Oversized uncompressed model artifacts (> 100 MB / candidate models, retained locally)
+artifacts/models/unsw_nb15_pipeline.joblib
+reports/ids_model_comparison/best_candidate_model.joblib
+reports/ids_model_comparison/candidate_models/extra_trees.joblib
+reports/ids_model_comparison/candidate_models/rf_random_oversampler.joblib
+reports/ids_model_comparison/candidate_models/rf_baseline.joblib
+reports/ids_model_comparison/candidate_models/rf_balanced.joblib
+reports/ids_model_comparison/candidate_models/rf_balanced_subsample.joblib

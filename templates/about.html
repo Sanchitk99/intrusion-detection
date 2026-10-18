@@ -3,195 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About | IDS Dashboard</title>
+    <title>SENTINEL | System Architecture &amp; Mission</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="alternate icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #050505;
-            --bg-panel: #171717;
-            --border: rgba(245, 158, 11, 0.38);
-            --text-main: #f8f9fa;
-            --text-muted: #c6c6c6;
-            --font-body: "Exo 2", "Segoe UI", sans-serif;
-            --font-display: "JetBrains Mono", "Consolas", monospace;
-            --font-data: "JetBrains Mono", "Consolas", monospace;
+            --bg-void: #030712;
+            --bg-panel: rgba(11, 19, 38, 0.75);
+            --bg-card: rgba(15, 23, 42, 0.65);
+            --accent-cyan: #00f2fe;
+            --accent-cyan-glow: rgba(0, 242, 254, 0.35);
+            --accent-blue: #38bdf8;
+            --accent-violet: #818cf8;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ff0055;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border-glow: rgba(56, 189, 248, 0.22);
+            --border-dim: rgba(148, 163, 184, 0.12);
+            --font-display: 'Space Grotesk', -apple-system, sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
-        * {
-            box-sizing: border-box;
-        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
         body {
-            margin: 0;
             min-height: 100vh;
-            background:
-                radial-gradient(circle at 10% 10%, rgba(245, 158, 11, 0.18), transparent 40%),
-                radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.06), transparent 42%),
-                linear-gradient(160deg, #020202 0%, #0a0a0a 45%, #010101 100%);
-            color: var(--text-main);
+            background-color: var(--bg-void);
+            background-image: 
+                radial-gradient(ellipse 90% 60% at 50% -20%, rgba(56, 189, 248, 0.18), transparent 70%),
+                radial-gradient(circle 600px at 15% 45%, rgba(0, 242, 254, 0.08), transparent 60%),
+                radial-gradient(circle 700px at 85% 75%, rgba(129, 140, 248, 0.07), transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+            background-attachment: fixed;
+            color: var(--text-primary);
             font-family: var(--font-body);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.02));
+            background-size: 100% 3px, 6px 100%;
+            z-index: 999;
+            opacity: 0.35;
+        }
+
+        /* ── Navbar ── */
         .ids-nav-shell {
             position: sticky;
             top: 0;
-            z-index: 50;
-            padding: 12px 24px 0;
+            z-index: 1200;
+            background: rgba(3, 7, 18, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glow);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(0, 242, 254, 0.2) inset;
         }
         .ids-nav {
             max-width: 1400px;
             margin: 0 auto;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: linear-gradient(180deg, rgba(20, 20, 20, 0.96) 0%, rgba(8, 8, 8, 0.96) 100%);
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26), inset 0 0 0 1px rgba(245, 158, 11, 0.12);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 14px;
-            padding: 12px 18px;
+            padding: 0 28px;
+            height: 70px;
         }
         .ids-brand {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            color: #f8fbff;
+            gap: 12px;
+            color: var(--text-primary);
             text-decoration: none;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .ids-brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(56, 189, 248, 0.05));
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 16px var(--accent-cyan-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .ids-brand:hover .ids-brand-icon {
+            transform: scale(1.06);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.55);
+        }
+        .ids-brand-logo-img {
+            width: 24px;
+            height: 24px;
+            display: block;
+        }
+        .ids-brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            line-height: 1.1;
+        }
+        .ids-brand-name {
             font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+        .ids-brand-tagline {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
             font-weight: 700;
-            letter-spacing: 0.04em;
-            white-space: nowrap;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--accent-blue);
         }
-        .ids-brand-dot {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 1px solid rgba(245, 158, 11, 0.68);
-            background: radial-gradient(circle at 30% 30%, #fbbf24 0%, #f59e0b 62%, #b45309 100%);
-            box-shadow: 0 0 16px rgba(245, 158, 11, 0.52);
+        @media (max-width: 680px) {
+            .ids-brand-tagline {
+                display: none;
+            }
         }
+        .ids-brand-badge {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            color: var(--accent-cyan);
+            letter-spacing: 0.08em;
+            margin-left: 4px;
+        }
+
         .ids-links {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 4px 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border-dim);
         }
         .ids-links a {
             color: var(--text-muted);
             text-decoration: none;
-            font-family: var(--font-data);
+            font-family: var(--font-mono);
             font-size: 0.78rem;
-            font-weight: 700;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .ids-links a:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .ids-links a.is-active {
+            color: var(--accent-cyan);
+            background: rgba(0, 242, 254, 0.1);
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.15) inset;
+        }
+
+        /* ── Content ── */
+        .content {
+            max-width: 1100px;
+            margin: 40px auto 60px;
+            padding: 0 24px;
+        }
+
+        .hero {
+            position: relative;
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            padding: 36px 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 18px; height: 18px;
+            border-top: 2px solid var(--accent-cyan);
+            border-left: 2px solid var(--accent-cyan);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 18px; height: 18px;
+            border-bottom: 2px solid var(--accent-cyan);
+            border-right: 2px solid var(--accent-cyan);
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: clamp(1.8rem, 3.4vw, 2.8rem);
             letter-spacing: 0.04em;
             text-transform: uppercase;
-            padding: 9px 13px;
-            border-radius: 999px;
-            border: 1px solid transparent;
-        }
-        .ids-links a:hover,
-        .ids-links a.is-active {
-            color: #f8fbff;
-            border-color: rgba(245, 158, 11, 0.45);
-            background: linear-gradient(180deg, rgba(245, 158, 11, 0.2) 0%, rgba(180, 83, 9, 0.1) 100%);
-        }
-        .content {
-            max-width: 1080px;
-            margin: 26px auto 34px;
-            padding: 0 22px;
-        }
-        .hero {
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            background: linear-gradient(180deg, rgba(22, 22, 22, 0.94) 0%, rgba(10, 10, 10, 0.96) 100%);
-            box-shadow: 0 10px 24px rgba(20, 12, 8, 0.24), inset 0 0 0 1px rgba(245, 158, 11, 0.1);
-            padding: 24px;
-            margin-bottom: 18px;
-        }
-        .hero h1 {
-            margin: 0 0 8px;
-            font-family: var(--font-display);
-            font-size: clamp(1.25rem, 2.2vw, 1.9rem);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            margin-bottom: 14px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .hero p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 0.98rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 800px;
         }
-        .hero p + p {
-            margin-top: 8px;
-        }
+        .hero p + p { margin-top: 10px; }
+
         .about-sections {
             display: grid;
-            gap: 16px;
+            gap: 20px;
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+
         .about-card {
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            background: linear-gradient(180deg, rgba(22, 22, 22, 0.94) 0%, rgba(10, 10, 10, 0.96) 100%);
-            box-shadow: 0 10px 24px rgba(20, 12, 8, 0.24), inset 0 0 0 1px rgba(245, 158, 11, 0.1);
-            padding: 20px;
+            position: relative;
+            border: 1px solid var(--border-glow);
+            border-radius: 14px;
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            padding: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        .about-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 12px; height: 12px;
+            border-top: 2px solid var(--accent-cyan);
+            border-left: 2px solid var(--accent-cyan);
+        }
+        .about-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 12px; height: 12px;
+            border-bottom: 2px solid var(--accent-cyan);
+            border-right: 2px solid var(--accent-cyan);
+        }
+        .about-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 242, 254, 0.5);
+            box-shadow: 0 14px 40px rgba(0, 242, 254, 0.12);
         }
         .about-card h2 {
-            margin: 0 0 10px;
             font-family: var(--font-display);
-            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+            margin-bottom: 14px;
             letter-spacing: 0.06em;
-            font-size: 0.95rem;
-            color: #ffffff;
+            text-transform: uppercase;
         }
         .about-card p {
-            margin: 0;
-            line-height: 1.6;
-            color: var(--text-muted);
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.7;
         }
-        .about-card p + p {
-            margin-top: 10px;
-        }
+        .about-card p + p { margin-top: 12px; }
+
         .about-card ul {
-            margin: 0;
-            padding-left: 18px;
+            list-style: none;
+            padding: 0;
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+        .about-card ul li {
+            position: relative;
+            padding-left: 24px;
+        }
+        .about-card ul li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--accent-cyan);
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+        .about-card ul li + li { margin-top: 10px; }
+
+        .about-card--wide { grid-column: 1 / -1; }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border-dim);
+        }
+        .bench-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-align: left;
+        }
+        .bench-table th {
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--accent-cyan);
+            padding: 12px 14px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-glow);
+            white-space: nowrap;
+        }
+        .bench-table td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border-dim);
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        .bench-table tr:hover td {
+            background: rgba(0, 242, 254, 0.04);
+            color: var(--text-primary);
+        }
+        .badge-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: rgba(0, 242, 254, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+        }
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+        .badge-danger {
+            background: rgba(255, 0, 85, 0.15);
+            color: #ff0055;
+            border-color: rgba(255, 0, 85, 0.4);
+        }
+        .bench-disclaimer {
+            font-size: 0.82rem;
             color: var(--text-muted);
             line-height: 1.6;
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: rgba(15, 23, 42, 0.6);
+            border-left: 3px solid var(--accent-cyan);
+            border-radius: 4px;
         }
-        .about-card li + li {
-            margin-top: 6px;
-        }
-        .about-card--wide {
-            grid-column: 1 / -1;
-        }
+
         @media (max-width: 900px) {
-            .ids-nav-shell {
-                padding: 10px 12px 0;
-            }
-            .ids-nav {
-                border-radius: 16px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .ids-brand {
-                width: 100%;
-                justify-content: center;
-            }
-            .content {
-                padding: 0 12px;
-            }
-            .hero,
-            .about-card {
-                padding: 16px;
-            }
-            .about-sections {
-                grid-template-columns: 1fr;
-            }
+            .ids-nav { height: auto; padding: 14px 20px; flex-wrap: wrap; }
+            .ids-links { width: 100%; justify-content: center; }
+            .about-sections { grid-template-columns: 1fr; }
+            .content { padding: 0 16px; margin: 24px auto 40px; }
+            .hero { padding: 24px; }
         }
     </style>
 </head>
 <body>
 <div class="ids-nav-shell">
     <nav class="ids-nav" aria-label="About Navigation">
-        <a href="/" class="ids-brand">
-            <span class="ids-brand-dot" aria-hidden="true"></span>
-            IDS Command
+        <a href="/" class="ids-brand" aria-label="SENTINEL Autonomous Cyber Defense">
+            <div class="ids-brand-icon">
+                <img src="{{ url_for('static', filename='favicon.svg') }}" alt="SENTINEL Shield Logo" width="24" height="24" class="ids-brand-logo-img" />
+            </div>
+            <div class="ids-brand-text">
+                <span class="ids-brand-name">SENTINEL</span>
+                <span class="ids-brand-tagline">Autonomous Cyber Defense</span>
+            </div>
+            <span class="ids-brand-badge">NODE // 01</span>
         </a>
         <div class="ids-links">
             <a href="/">Dashboard</a>
@@ -202,32 +413,144 @@
 
 <main class="content">
     <section class="hero">
-        <h1>About</h1>
-        <p>I built this IDS dashboard to make security data easier to understand and act on.</p>
-        <p>Instead of digging through scattered logs, you can see live behavior, model output, and risk level together in one place.</p>
+        <h1>System Architecture & Mission</h1>
+        <p>I built this autonomous IDS console to convert dense, scattered network packet telemetry into an actionable threat radar.</p>
+        <p>Instead of digging through thousands of unstructured terminal rows, operators can cross-examine live network behaviour, neural classification vectors, and anomalous risk spikes in a unified command center.</p>
     </section>
 
     <section class="about-sections">
         <article class="about-card">
-            <h2>What This Dashboard Does</h2>
-            <p>It monitors incoming metrics, evaluates activity with a trained model, and reports whether behavior looks normal or suspicious.</p>
-            <p>The interface is designed to show useful signals first: attack type, confidence, and risk status.</p>
+            <h2>Surveillance Capabilities</h2>
+            <p>Monitors system socket states, calculates throughput deltas, and continuously scores dynamic feature vectors against an ensemble-trained Random Forest model to instantly flag anomalous behavioral signatures.</p>
+            <p>Every packet rate, source endpoint, and destination port is categorized to minimize operator cognitive fatigue.</p>
         </article>
 
         <article class="about-card">
-            <h2>Why I Built It</h2>
-            <p>Most IDS demos look impressive but are hard to use day to day. I wanted something practical, understandable, and easy to test.</p>
-            <p>This project is my way of connecting machine learning with real security workflows, not just model accuracy numbers.</p>
+            <h2>Engineering Philosophy</h2>
+            <p>Most machine learning security demonstrations are synthetic academic toys that fall apart in realistic operations. This platform bridges that gap by unifying ML model inference with host-level operational diagnostics.</p>
+            <p>It provides full inspection transparency with reproducible evaluation benchmarks and verifiable confidence levels.</p>
         </article>
 
         <article class="about-card about-card--wide">
-            <h2>How You Can Use It</h2>
+            <h2>Operational Workflows</h2>
             <ul>
-                <li>Watch live detection behavior and system health in real time.</li>
-                <li>Run simulated attacks to verify alerts and confidence changes.</li>
-                <li>Upload CSV activity data to analyze larger samples quickly.</li>
-                <li>Use it as a base for your own IDS experiments and improvements.</li>
+                <li>Observe real-time packet ingress/egress ratios and socket health on host node.</li>
+                <li>Simulate attack flood anomalies to test detection tripwires and confidence degradation.</li>
+                <li>Ingest offline activity capture CSV logs to execute batch inference across millions of records.</li>
+                <li>Inspect attack classifications mapped accurately against NSL-KDD threat taxonomies.</li>
             </ul>
+        </article>
+
+        <article class="about-card about-card--wide">
+            <h2>Multi-Dataset Benchmark Comparison Matrix</h2>
+            <p>All reported scores are generated via reproducible test scripts using strict, leakage-free pipelines (100 trees, <code>class_weight='balanced_subsample'</code>, Random State 42).</p>
+            <div class="table-responsive">
+                <table class="bench-table">
+                    <thead>
+                        <tr>
+                            <th>Dataset</th>
+                            <th>Features</th>
+                            <th>Test Samples</th>
+                            <th>Split Strategy</th>
+                            <th>Accuracy</th>
+                            <th>Binary F1</th>
+                            <th>Macro F1</th>
+                            <th>FPR</th>
+                            <th>ROC-AUC</th>
+                            <th>PR-AUC</th>
+                            <th>Minority U2R</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>NSL-KDD</strong></td>
+                            <td>41</td>
+                            <td>29,704</td>
+                            <td>Stratified 80/20 Holdout</td>
+                            <td><span class="badge-pill">99.46%</span></td>
+                            <td>0.9945</td>
+                            <td>0.7539</td>
+                            <td>0.0045</td>
+                            <td>0.9998</td>
+                            <td>0.9998</td>
+                            <td><span class="badge-pill badge-warning">50.0% / 42.9%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>UNSW-NB15</strong></td>
+                            <td>42</td>
+                            <td>16,467</td>
+                            <td>Stratified 80/20 Holdout</td>
+                            <td><span class="badge-pill">87.51%</span></td>
+                            <td>0.9749</td>
+                            <td>0.7315</td>
+                            <td>0.0111</td>
+                            <td>0.9972</td>
+                            <td>0.9978</td>
+                            <td><span class="badge-pill badge-warning">47.37%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>CICIDS2017</strong></td>
+                            <td>78</td>
+                            <td>57,294</td>
+                            <td>Holdout (Deduplicated verification)</td>
+                            <td><span class="badge-pill">99.99%</span></td>
+                            <td>0.9999</td>
+                            <td>0.9999</td>
+                            <td>0.0000</td>
+                            <td>1.0000</td>
+                            <td>1.0000</td>
+                            <td>PortScan Vector</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bench-disclaimer">
+                <strong>Critical Comparability Disclaimer:</strong> Scores across datasets are <em>not directly equivalent</em>. NSL-KDD models connection summary counters, UNSW-NB15 features packet window statistics and jitter, and CICIDS2017 measures flow statistical inter-arrival times.
+            </div>
+        </article>
+
+        <article class="about-card about-card--wide">
+            <h2>Cross-Dataset Domain Shift Collapse (Empirical Transfer)</h2>
+            <p>To verify generalization limits, a model was trained on common flow predictors (<code>duration</code>, <code>src_bytes</code>, <code>dst_bytes</code>, <code>count</code>) on NSL-KDD and evaluated across datasets:</p>
+            <div class="table-responsive">
+                <table class="bench-table">
+                    <thead>
+                        <tr>
+                            <th>Evaluation Domain</th>
+                            <th>Source</th>
+                            <th>Target</th>
+                            <th>Accuracy</th>
+                            <th>Binary F1</th>
+                            <th>Transfer Performance Drop</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>In-Domain Baseline</strong></td>
+                            <td>NSL-KDD</td>
+                            <td>NSL-KDD Holdout</td>
+                            <td>97.86%</td>
+                            <td>0.9768</td>
+                            <td><span class="badge-pill">Baseline</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cross-Domain Shift</strong></td>
+                            <td>NSL-KDD</td>
+                            <td>UNSW-NB15</td>
+                            <td>2.15%</td>
+                            <td>0.0199</td>
+                            <td><span class="badge-pill badge-danger">-0.9568 F1 Drop</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p><strong>Technical Insight:</strong> Machine learning network intrusion detection models cannot be transferred naively across differing enterprise networks without domain adaptation or dataset-specific feature engineering.</p>
+        </article>
+
+        <article class="about-card about-card--wide">
+            <h2>Telemetry Boundaries & Safety Policy</h2>
+            <p><strong>1. Live Socket Polling vs Kernel Packet Capture:</strong> The live-flows engine queries active OS socket tables (5-tuples, connection states, sliding-window destination counts). Deep packet inspection (payload byte contents, application login sessions) requires Npcap/WinPcap kernel drivers and is defaulted to 0 to prevent artificial data fabrication.</p>
+            <p style="margin-top: 8px;"><strong>2. Strict Alert-Only Policy (<code>ALERT_ONLY_NO_AUTO_BLOCK</code>):</strong> Sentinel IDS provides high-confidence alerts, anomaly indicators, and recommended playbooks for SOC analysts. The system contains zero automated firewall drop rules or process termination routines to eliminate business disruption and false-positive denial of service.</p>
         </article>
     </section>
 </main>

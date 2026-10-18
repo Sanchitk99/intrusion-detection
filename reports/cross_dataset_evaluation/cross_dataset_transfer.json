@@ -1,0 +1,39 @@
+{
+  "datasets": {
+    "nsl_kdd": {
+      "samples": 148517,
+      "features": 41
+    },
+    "unsw_nb15": {
+      "samples": 82332,
+      "features": 42
+    },
+    "cicids2017": {
+      "samples": 286467,
+      "features": 78
+    }
+  },
+  "feature_overlap": {
+    "nsl_vs_unsw_exact_name_matches": 1,
+    "nsl_vs_cic_exact_name_matches": 0,
+    "unsw_vs_cic_exact_name_matches": 0
+  },
+  "transfer_experiments": [
+    {
+      "source_dataset": "NSL-KDD",
+      "target_dataset": "UNSW-NB15",
+      "shared_features": [
+        "duration",
+        "src_bytes",
+        "dst_bytes",
+        "count"
+      ],
+      "in_domain_nsl_accuracy": 0.97855,
+      "in_domain_nsl_f1": 0.9767517476833035,
+      "cross_domain_unsw_accuracy": 0.0215,
+      "cross_domain_unsw_f1": 0.019931891025641024,
+      "f1_drop": 0.9568,
+      "conclusion": "Cross-dataset transfer confirms catastrophic performance drop due to fundamental environment and sensor distribution shift (Covariate Shift). Models must maintain dataset-specific feature schemas."
+    }
+  ]
+}

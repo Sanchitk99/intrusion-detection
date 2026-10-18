@@ -1,0 +1,120 @@
+{
+  "backups": [
+    {
+      "name": "unsw_nb15_pipeline",
+      "original_path": "D:\\Project\\intrusion-detection\\artifacts\\models\\unsw_nb15_pipeline.joblib",
+      "backup_path": "D:\\Project\\intrusion-detection\\backups\\original_models\\unsw_nb15_pipeline.joblib",
+      "size_mb": 116.05,
+      "sha256": "b5ceb0e10fc1a532284a8e46ab0db5d9f520c4497bef1e256e3666dd54e6b27a",
+      "backup_sha256": "b5ceb0e10fc1a532284a8e46ab0db5d9f520c4497bef1e256e3666dd54e6b27a",
+      "hash_match": true
+    },
+    {
+      "name": "best_candidate_model",
+      "original_path": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\best_candidate_model.joblib",
+      "backup_path": "D:\\Project\\intrusion-detection\\backups\\original_models\\best_candidate_model.joblib",
+      "size_mb": 108.07,
+      "sha256": "7ddaa797bb4b6bc6af1b94f6d9ef5bc7450865b0d68a99f070663ab96bbc0db1",
+      "backup_sha256": "7ddaa797bb4b6bc6af1b94f6d9ef5bc7450865b0d68a99f070663ab96bbc0db1",
+      "hash_match": true
+    },
+    {
+      "name": "rf_random_oversampler",
+      "original_path": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\candidate_models\\rf_random_oversampler.joblib",
+      "backup_path": "D:\\Project\\intrusion-detection\\backups\\original_models\\rf_random_oversampler.joblib",
+      "size_mb": 53.42,
+      "sha256": "d62db2e75e3222a5681dc068ea9e1eb50595d2499c9e290ca632c720ada46125",
+      "backup_sha256": "d62db2e75e3222a5681dc068ea9e1eb50595d2499c9e290ca632c720ada46125",
+      "hash_match": true
+    },
+    {
+      "name": "extra_trees",
+      "original_path": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\candidate_models\\extra_trees.joblib",
+      "backup_path": "D:\\Project\\intrusion-detection\\backups\\original_models\\extra_trees.joblib",
+      "size_mb": 108.07,
+      "sha256": "7ddaa797bb4b6bc6af1b94f6d9ef5bc7450865b0d68a99f070663ab96bbc0db1",
+      "backup_sha256": "7ddaa797bb4b6bc6af1b94f6d9ef5bc7450865b0d68a99f070663ab96bbc0db1",
+      "hash_match": true
+    }
+  ],
+  "compression": [
+    {
+      "name": "unsw_nb15_pipeline",
+      "original_file": "D:\\Project\\intrusion-detection\\artifacts\\models\\unsw_nb15_pipeline.joblib",
+      "compressed_file": "D:\\Project\\intrusion-detection\\artifacts\\models\\unsw_nb15_pipeline_compressed.joblib",
+      "original_size_bytes": 121689586,
+      "compressed_size_bytes": 28957146,
+      "original_size_mb": 116.05,
+      "compressed_size_mb": 27.62,
+      "reduction_percent": 76.2,
+      "under_100mb": true,
+      "time_seconds": 8.17
+    },
+    {
+      "name": "best_candidate_model",
+      "original_file": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\best_candidate_model.joblib",
+      "compressed_file": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\best_candidate_model_compressed.joblib",
+      "original_size_bytes": 113320098,
+      "compressed_size_bytes": 24947380,
+      "original_size_mb": 108.07,
+      "compressed_size_mb": 23.79,
+      "reduction_percent": 77.99,
+      "under_100mb": true,
+      "time_seconds": 5.05
+    },
+    {
+      "name": "rf_random_oversampler",
+      "original_file": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\candidate_models\\rf_random_oversampler.joblib",
+      "compressed_file": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\candidate_models\\rf_random_oversampler_compressed.joblib",
+      "original_size_bytes": 56014382,
+      "compressed_size_bytes": 12351667,
+      "original_size_mb": 53.42,
+      "compressed_size_mb": 11.78,
+      "reduction_percent": 77.95,
+      "under_100mb": true,
+      "time_seconds": 3.83
+    },
+    {
+      "name": "extra_trees",
+      "original_file": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\candidate_models\\extra_trees.joblib",
+      "compressed_file": "D:\\Project\\intrusion-detection\\reports\\ids_model_comparison\\candidate_models\\extra_trees_compressed.joblib",
+      "original_size_bytes": 113320098,
+      "compressed_size_bytes": 25236886,
+      "original_size_mb": 108.07,
+      "compressed_size_mb": 24.07,
+      "reduction_percent": 77.73,
+      "under_100mb": true,
+      "time_seconds": 5.14
+    }
+  ],
+  "validation": [
+    {
+      "name": "unsw_nb15_pipeline",
+      "predictions_equal": true,
+      "probabilities_equal": true,
+      "max_proba_diff": 0.0,
+      "sample_count": 200
+    },
+    {
+      "name": "best_candidate_model",
+      "predictions_equal": true,
+      "probabilities_equal": true,
+      "max_proba_diff": 0.0,
+      "sample_count": 200
+    },
+    {
+      "name": "rf_random_oversampler",
+      "predictions_equal": true,
+      "probabilities_equal": true,
+      "max_proba_diff": 0.0,
+      "sample_count": 200
+    },
+    {
+      "name": "extra_trees",
+      "predictions_equal": true,
+      "probabilities_equal": true,
+      "max_proba_diff": 0.0,
+      "sample_count": 200
+    }
+  ]
+}

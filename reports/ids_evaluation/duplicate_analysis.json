@@ -1,0 +1,14 @@
+{
+  "conflicting_label_predictor_groups": 116,
+  "conflicting_label_predictor_rows": 247,
+  "conflicting_label_row_percentage": 0.166311,
+  "duplicate_predictor_extra_rows": 727,
+  "duplicate_predictor_groups": 712,
+  "duplicate_predictor_row_percentage": 0.968913,
+  "duplicate_predictor_rows_in_groups": 1439,
+  "exact_duplicate_extra_rows": 610,
+  "exact_duplicate_groups": 610,
+  "exact_duplicate_row_percentage": 0.821455,
+  "exact_duplicate_rows_in_groups": 1220,
+  "total_rows": 148517
+}

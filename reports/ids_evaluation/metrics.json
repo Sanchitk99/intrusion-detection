@@ -1,0 +1,541 @@
+{
+  "configuration": {
+    "n_estimators": 150,
+    "normal_label": "Normal",
+    "random_state": 42,
+    "target_column": "label",
+    "target_leakage_check": "target excluded from predictor columns",
+    "test_size": 0.2
+  },
+  "data_audit": {
+    "categorical_columns": [
+      "protocol_type",
+      "service",
+      "flag"
+    ],
+    "columns": [
+      "duration",
+      "protocol_type",
+      "service",
+      "flag",
+      "src_bytes",
+      "dst_bytes",
+      "land",
+      "wrong_fragment",
+      "urgent",
+      "hot",
+      "num_failed_logins",
+      "logged_in",
+      "num_compromised",
+      "root_shell",
+      "su_attempted",
+      "num_root",
+      "num_file_creations",
+      "num_shells",
+      "num_access_files",
+      "num_outbound_cmds",
+      "is_host_login",
+      "is_guest_login",
+      "count",
+      "srv_count",
+      "serror_rate",
+      "srv_serror_rate",
+      "rerror_rate",
+      "srv_rerror_rate",
+      "same_srv_rate",
+      "diff_srv_rate",
+      "srv_diff_host_rate",
+      "dst_host_count",
+      "dst_host_srv_count",
+      "dst_host_same_srv_rate",
+      "dst_host_diff_srv_rate",
+      "dst_host_same_src_port_rate",
+      "dst_host_srv_diff_host_rate",
+      "dst_host_serror_rate",
+      "dst_host_srv_serror_rate",
+      "dst_host_rerror_rate",
+      "dst_host_srv_rerror_rate",
+      "label"
+    ],
+    "data_path": "D:\\Project\\intrusion-detection\\data\\nsl_kdd.csv",
+    "invalid_label_count": 0,
+    "mapped_classes": [
+      "DoS",
+      "Normal",
+      "Other",
+      "Probe",
+      "R2L",
+      "U2R"
+    ],
+    "missing_value_count": 0,
+    "predictor_columns": [
+      "duration",
+      "protocol_type",
+      "service",
+      "flag",
+      "src_bytes",
+      "dst_bytes",
+      "land",
+      "wrong_fragment",
+      "urgent",
+      "hot",
+      "num_failed_logins",
+      "logged_in",
+      "num_compromised",
+      "root_shell",
+      "su_attempted",
+      "num_root",
+      "num_file_creations",
+      "num_shells",
+      "num_access_files",
+      "num_outbound_cmds",
+      "is_host_login",
+      "is_guest_login",
+      "count",
+      "srv_count",
+      "serror_rate",
+      "srv_serror_rate",
+      "rerror_rate",
+      "srv_rerror_rate",
+      "same_srv_rate",
+      "diff_srv_rate",
+      "srv_diff_host_rate",
+      "dst_host_count",
+      "dst_host_srv_count",
+      "dst_host_same_srv_rate",
+      "dst_host_diff_srv_rate",
+      "dst_host_same_src_port_rate",
+      "dst_host_srv_diff_host_rate",
+      "dst_host_serror_rate",
+      "dst_host_srv_serror_rate",
+      "dst_host_rerror_rate",
+      "dst_host_srv_rerror_rate"
+    ],
+    "predictor_count": 41,
+    "raw_label_count": 40,
+    "raw_labels_mapped_to_other": [
+      "httptunnel",
+      "named",
+      "ps",
+      "sendmail",
+      "snmpgetattack",
+      "snmpguess",
+      "worm"
+    ],
+    "rows": 148517,
+    "target_column": "label",
+    "unexpected_columns": []
+  },
+  "duplicate_analysis": {
+    "conflicting_label_predictor_groups": 116,
+    "conflicting_label_predictor_rows": 247,
+    "conflicting_label_row_percentage": 0.166311,
+    "duplicate_predictor_extra_rows": 727,
+    "duplicate_predictor_groups": 712,
+    "duplicate_predictor_row_percentage": 0.968913,
+    "duplicate_predictor_rows_in_groups": 1439,
+    "exact_duplicate_extra_rows": 610,
+    "exact_duplicate_groups": 610,
+    "exact_duplicate_row_percentage": 0.821455,
+    "exact_duplicate_rows_in_groups": 1220,
+    "total_rows": 148517
+  },
+  "evaluations": {
+    "evaluation_a": {
+      "binary_intrusion_metrics": {
+        "confusion_matrix": {
+          "false_negative": 80,
+          "false_positive": 56,
+          "labels": [
+            "Normal",
+            "Intrusion"
+          ],
+          "rows_true_columns_predicted": [
+            [
+              15355,
+              56
+            ],
+            [
+              80,
+              14213
+            ]
+          ],
+          "true_negative": 15355,
+          "true_positive": 14213
+        },
+        "f1": 0.9952384286814648,
+        "false_negative_rate": 0.0055971454558175334,
+        "false_positive_rate": 0.003633768087729544,
+        "positive_definition": "any mapped class other than Normal",
+        "pr_auc": 0.999724646617081,
+        "precision": 0.9960754082276263,
+        "recall": 0.9944028545441824,
+        "roc_auc": 0.9998100281036284
+      },
+      "class_distribution": {
+        "test": {
+          "DoS": {
+            "count": 10677,
+            "percentage": 35.944654
+          },
+          "Normal": {
+            "count": 15411,
+            "percentage": 51.881901
+          },
+          "Other": {
+            "count": 138,
+            "percentage": 0.464584
+          },
+          "Probe": {
+            "count": 2816,
+            "percentage": 9.480205
+          },
+          "R2L": {
+            "count": 641,
+            "percentage": 2.157959
+          },
+          "U2R": {
+            "count": 21,
+            "percentage": 0.070698
+          }
+        },
+        "train": {
+          "DoS": {
+            "count": 42708,
+            "percentage": 35.945562
+          },
+          "Normal": {
+            "count": 61643,
+            "percentage": 51.88237
+          },
+          "Other": {
+            "count": 552,
+            "percentage": 0.464596
+          },
+          "Probe": {
+            "count": 11261,
+            "percentage": 9.477919
+          },
+          "R2L": {
+            "count": 2566,
+            "percentage": 2.159696
+          },
+          "U2R": {
+            "count": 83,
+            "percentage": 0.069858
+          }
+        }
+      },
+      "majority_class_baseline": {
+        "class_selected_from_training": "Normal",
+        "test_accuracy": 0.5188190142741719
+      },
+      "model": {
+        "classifier": "RandomForestClassifier",
+        "n_estimators": 150,
+        "n_jobs": -1,
+        "preprocessing": "ColumnTransformer(OneHotEncoder(handle_unknown='ignore'), StandardScaler)",
+        "preprocessing_fit_scope": "training_partition_only",
+        "random_state": 42
+      },
+      "name": "Evaluation A - stratified random holdout",
+      "overall_accuracy": 0.995253164556962,
+      "partition_overlap": {
+        "shared_exact_full_record_groups": 185,
+        "shared_predictor_groups": 220,
+        "test_rows_with_exact_full_record_seen_in_train": 186,
+        "test_rows_with_predictor_seen_in_train": 222
+      },
+      "per_class": {
+        "DoS": {
+          "f1-score": 0.9992508661859725,
+          "precision": 0.9990637580750866,
+          "recall": 0.9994380443944928,
+          "support": 10677.0
+        },
+        "Normal": {
+          "f1-score": 0.9955910004538676,
+          "precision": 0.9948169744088111,
+          "recall": 0.9963662319122705,
+          "support": 15411.0
+        },
+        "Other": {
+          "f1-score": 0.7898550724637681,
+          "precision": 0.7898550724637681,
+          "recall": 0.7898550724637681,
+          "support": 138.0
+        },
+        "Probe": {
+          "f1-score": 0.9957416607523066,
+          "precision": 0.9950354609929078,
+          "recall": 0.9964488636363636,
+          "support": 2816.0
+        },
+        "R2L": {
+          "f1-score": 0.9753772835583797,
+          "precision": 0.9935275080906149,
+          "recall": 0.9578783151326054,
+          "support": 641.0
+        },
+        "U2R": {
+          "f1-score": 0.48484848484848486,
+          "precision": 0.6666666666666666,
+          "recall": 0.38095238095238093,
+          "support": 21.0
+        },
+        "accuracy": 0.995253164556962,
+        "macro avg": {
+          "f1-score": 0.8734440613771298,
+          "precision": 0.9064942401163093,
+          "recall": 0.8534898180819802,
+          "support": 29704.0
+        },
+        "weighted avg": {
+          "f1-score": 0.9951677073755527,
+          "precision": 0.9951521387161325,
+          "recall": 0.995253164556962,
+          "support": 29704.0
+        }
+      },
+      "predictions_verified_against_ground_truth": true,
+      "six_class_metrics": {
+        "balanced_accuracy": 0.8534898180819802,
+        "macro_f1": 0.8734440613771298,
+        "roc_auc_ovr_macro": 0.9991458243175569,
+        "weighted_f1": 0.9951677073755527
+      },
+      "split": {
+        "random_state": 42,
+        "strategy": "stratified_random_holdout",
+        "test_percentage": 20.000404,
+        "test_rows": 29704,
+        "train_percentage": 79.999596,
+        "train_rows": 118813
+      },
+      "timing": {
+        "inference_time_seconds": 0.2018,
+        "samples_per_second_inference": 147195.2,
+        "training_time_seconds": 5.1121
+      },
+      "u2r_recall": 0.38095238095238093
+    },
+    "evaluation_b": {
+      "binary_intrusion_metrics": {
+        "confusion_matrix": {
+          "false_negative": 90,
+          "false_positive": 29,
+          "labels": [
+            "Normal",
+            "Intrusion"
+          ],
+          "rows_true_columns_predicted": [
+            [
+              15403,
+              29
+            ],
+            [
+              90,
+              14165
+            ]
+          ],
+          "true_negative": 15403,
+          "true_positive": 14165
+        },
+        "f1": 0.9958170761713945,
+        "false_negative_rate": 0.006313574184496668,
+        "false_positive_rate": 0.0018792120269569726,
+        "positive_definition": "any mapped class other than Normal",
+        "pr_auc": 0.9995576437790865,
+        "precision": 0.9979568831900804,
+        "recall": 0.9936864258155034,
+        "roc_auc": 0.999767836774415
+      },
+      "class_distribution": {
+        "test": {
+          "DoS": {
+            "count": 10699,
+            "percentage": 36.039344
+          },
+          "Normal": {
+            "count": 15432,
+            "percentage": 51.982349
+          },
+          "Other": {
+            "count": 150,
+            "percentage": 0.505272
+          },
+          "Probe": {
+            "count": 2746,
+            "percentage": 9.24984
+          },
+          "R2L": {
+            "count": 646,
+            "percentage": 2.176037
+          },
+          "U2R": {
+            "count": 14,
+            "percentage": 0.047159
+          }
+        },
+        "train": {
+          "DoS": {
+            "count": 42686,
+            "percentage": 35.921905
+          },
+          "Normal": {
+            "count": 61622,
+            "percentage": 51.857275
+          },
+          "Other": {
+            "count": 540,
+            "percentage": 0.454431
+          },
+          "Probe": {
+            "count": 11331,
+            "percentage": 9.535471
+          },
+          "R2L": {
+            "count": 2561,
+            "percentage": 2.15518
+          },
+          "U2R": {
+            "count": 90,
+            "percentage": 0.075738
+          }
+        }
+      },
+      "majority_class_baseline": {
+        "class_selected_from_training": "Normal",
+        "test_accuracy": 0.5198234917640718
+      },
+      "model": {
+        "classifier": "RandomForestClassifier",
+        "n_estimators": 150,
+        "n_jobs": -1,
+        "preprocessing": "ColumnTransformer(OneHotEncoder(handle_unknown='ignore'), StandardScaler)",
+        "preprocessing_fit_scope": "training_partition_only",
+        "random_state": 42
+      },
+      "name": "Evaluation B - duplicate-aware holdout",
+      "overall_accuracy": 0.9958904571024354,
+      "partition_overlap": {
+        "shared_exact_full_record_groups": 0,
+        "shared_predictor_groups": 0,
+        "test_rows_with_exact_full_record_seen_in_train": 0,
+        "test_rows_with_predictor_seen_in_train": 0
+      },
+      "per_class": {
+        "DoS": {
+          "f1-score": 0.999439304737875,
+          "precision": 0.9992525460151359,
+          "recall": 0.9996261332834845,
+          "support": 10699.0
+        },
+        "Normal": {
+          "f1-score": 0.9961519805982215,
+          "precision": 0.9941909249338411,
+          "recall": 0.998120787973043,
+          "support": 15432.0
+        },
+        "Other": {
+          "f1-score": 0.8265682656826568,
+          "precision": 0.9256198347107438,
+          "recall": 0.7466666666666667,
+          "support": 150.0
+        },
+        "Probe": {
+          "f1-score": 0.9950810712333759,
+          "precision": 0.995625227852716,
+          "recall": 0.9945375091041515,
+          "support": 2746.0
+        },
+        "R2L": {
+          "f1-score": 0.9770750988142293,
+          "precision": 0.9983844911147012,
+          "recall": 0.9566563467492261,
+          "support": 646.0
+        },
+        "U2R": {
+          "f1-score": 0.5454545454545454,
+          "precision": 0.75,
+          "recall": 0.42857142857142855,
+          "support": 14.0
+        },
+        "accuracy": 0.9958904571024354,
+        "macro avg": {
+          "f1-score": 0.8899617110868174,
+          "precision": 0.9438455041045231,
+          "recall": 0.8540298120580001,
+          "support": 29687.0
+        },
+        "weighted avg": {
+          "f1-score": 0.9957531318392524,
+          "precision": 0.9957773966903103,
+          "recall": 0.9958904571024354,
+          "support": 29687.0
+        }
+      },
+      "predictions_verified_against_ground_truth": true,
+      "six_class_metrics": {
+        "balanced_accuracy": 0.8540298120580001,
+        "macro_f1": 0.8899617110868174,
+        "roc_auc_ovr_macro": 0.9920284537157317,
+        "weighted_f1": 0.9957531318392524
+      },
+      "split": {
+        "all_fold_test_sizes": [
+          {
+            "distribution_error": 0.009381256574737548,
+            "fold": 1,
+            "test_rows": 29694,
+            "test_share": 0.19993670758229698
+          },
+          {
+            "distribution_error": 0.007572130544463888,
+            "fold": 2,
+            "test_rows": 29713,
+            "test_share": 0.2000646390648882
+          },
+          {
+            "distribution_error": 0.01002745863269905,
+            "fold": 3,
+            "test_rows": 29721,
+            "test_share": 0.20011850495229502
+          },
+          {
+            "distribution_error": 0.00646917030062338,
+            "fold": 4,
+            "test_rows": 29702,
+            "test_share": 0.1999905734697038
+          },
+          {
+            "distribution_error": 0.005028063603186705,
+            "fold": 5,
+            "test_rows": 29687,
+            "test_share": 0.199889574930816
+          }
+        ],
+        "group_count": 147790,
+        "method": "StratifiedGroupKFold",
+        "n_splits": 5,
+        "random_state": 42,
+        "selected_distribution_error": 0.005028063603186705,
+        "selected_fold": 5,
+        "selected_test_share": 0.199889574930816,
+        "selection_rule": "closest to 20% test size plus class-distribution error",
+        "strategy": "duplicate_aware_stratified_group_holdout",
+        "test_percentage": 19.988957,
+        "test_rows": 29687,
+        "train_percentage": 80.011043,
+        "train_rows": 118830
+      },
+      "timing": {
+        "inference_time_seconds": 0.173,
+        "samples_per_second_inference": 171601.2,
+        "training_time_seconds": 5.0447
+      },
+      "u2r_recall": 0.42857142857142855
+    }
+  },
+  "schema_version": 1
+}

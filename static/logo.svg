@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" width="320" height="64" fill="none">
+    <defs>
+        <!-- Glow Filter -->
+        <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+        
+        <!-- Shield Contour Gradient -->
+        <linearGradient id="shieldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00f2fe" />
+            <stop offset="50%" stop-color="#38bdf8" />
+            <stop offset="100%" stop-color="#0284c7" />
+        </linearGradient>
+
+        <!-- Inner Shield Background -->
+        <linearGradient id="shieldBg" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stop-color="#0b1736" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#030816" stop-opacity="0.98" />
+        </linearGradient>
+
+        <!-- Circuit Trace Gradient -->
+        <linearGradient id="traceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00f2fe" />
+            <stop offset="100%" stop-color="#818cf8" />
+        </linearGradient>
+
+        <!-- Brand Text Gradient -->
+        <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="60%" stop-color="#e0f2fe" />
+            <stop offset="100%" stop-color="#00f2fe" />
+        </linearGradient>
+    </defs>
+
+    <!-- Shield Symbol Mark (Translated and Scaled) -->
+    <g transform="translate(6, 2) scale(0.9375)">
+        <!-- Outer Cyber Shield Contour -->
+        <path d="M 32 4 
+                 L 53 11 
+                 C 53 32 44.5 48 32 60 
+                 C 19.5 48 11 32 11 11 
+                 Z" 
+              fill="url(#shieldBg)" 
+              stroke="url(#shieldStroke)" 
+              stroke-width="2.5" 
+              stroke-linejoin="round"
+              filter="url(#logoGlow)" />
+
+        <!-- Inner Accent Bevel -->
+        <path d="M 32 9 
+                 L 48 14.5 
+                 C 48 31 41 44.5 32 54.5 
+                 C 23 44.5 16 31 16 14.5 
+                 Z" 
+              fill="none" 
+              stroke="rgba(56, 189, 248, 0.25)" 
+              stroke-width="1" />
+
+        <!-- Circuit / Network Traces inside Shield -->
+        <path d="M 23 20 L 41 20" stroke="url(#traceGrad)" stroke-width="1.5" stroke-linecap="round" />
+        <path d="M 23 20 L 32 28 L 41 20" stroke="url(#traceGrad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 32 28 L 32 42" stroke="url(#traceGrad)" stroke-width="2" stroke-linecap="round" />
+        <path d="M 23 20 L 21 34 L 32 42 L 43 34 L 41 20" stroke="url(#traceGrad)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 32 42 L 32 50" stroke="url(#traceGrad)" stroke-width="2" stroke-linecap="round" />
+
+        <!-- Network Nodes (Vertices) -->
+        <circle cx="23" cy="20" r="2.2" fill="#00f2fe" filter="url(#logoGlow)" />
+        <circle cx="41" cy="20" r="2.2" fill="#00f2fe" filter="url(#logoGlow)" />
+        <circle cx="21" cy="34" r="2.2" fill="#38bdf8" />
+        <circle cx="43" cy="34" r="2.2" fill="#38bdf8" />
+        <circle cx="32" cy="50" r="2" fill="#00f2fe" />
+
+        <!-- Central Nodes -->
+        <circle cx="32" cy="28" r="4" fill="#00f2fe" filter="url(#logoGlow)" />
+        <circle cx="32" cy="28" r="1.8" fill="#ffffff" />
+        <circle cx="32" cy="42" r="3" fill="#38bdf8" filter="url(#logoGlow)" />
+        <circle cx="32" cy="42" r="1.3" fill="#ffffff" />
+    </g>
+
+    <!-- Typography: Brand Name -->
+    <text x="74" y="34" 
+          font-family="'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" 
+          font-size="26" 
+          font-weight="800" 
+          letter-spacing="0.14em" 
+          fill="url(#textGrad)">SENTINEL</text>
+
+    <!-- Typography: Tagline -->
+    <g transform="translate(74, 48)">
+        <circle cx="3" cy="-3.5" r="2.2" fill="#00f2fe" filter="url(#logoGlow)" />
+        <text x="12" y="0" 
+              font-family="'JetBrains Mono', 'Courier New', monospace" 
+              font-size="8.8" 
+              font-weight="700" 
+              letter-spacing="0.22em" 
+              fill="#38bdf8">AUTONOMOUS CYBER DEFENSE</text>
+    </g>
+</svg>
+

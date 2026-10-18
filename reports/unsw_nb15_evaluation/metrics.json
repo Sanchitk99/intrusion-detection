@@ -1,0 +1,165 @@
+{
+  "binary_metrics": {
+    "accuracy": 0.8750835003340013,
+    "confusion_matrix": {
+      "fn": 366,
+      "fp": 82,
+      "tn": 7318,
+      "tp": 8701
+    },
+    "f1": 0.9749019607843137,
+    "false_negative_rate": 0.040366163008712916,
+    "false_positive_rate": 0.01108108108108108,
+    "pr_auc": 0.9978312018980029,
+    "precision": 0.9906637823067289,
+    "recall": 0.9596338369912871,
+    "roc_auc": 0.997187357479902
+  },
+  "dataset": "unsw_nb15",
+  "multiclass_metrics": {
+    "accuracy": 0.8750835003340013,
+    "balanced_accuracy": 0.7266215672558675,
+    "confusion_matrix": [
+      [
+        489,
+        23,
+        5,
+        84,
+        212,
+        5
+      ],
+      [
+        1,
+        7318,
+        1,
+        62,
+        12,
+        6
+      ],
+      [
+        11,
+        23,
+        3645,
+        5,
+        98,
+        1
+      ],
+      [
+        214,
+        213,
+        1,
+        1437,
+        178,
+        4
+      ],
+      [
+        500,
+        92,
+        3,
+        257,
+        1485,
+        6
+      ],
+      [
+        1,
+        15,
+        3,
+        10,
+        11,
+        36
+      ]
+    ],
+    "labels": [
+      "DoS",
+      "Normal",
+      "Other",
+      "Probe",
+      "R2L",
+      "U2R"
+    ],
+    "macro_f1": 0.7315301584154859,
+    "per_class": {
+      "DoS": {
+        "f1-score": 0.4808259587020649,
+        "precision": 0.40213815789473684,
+        "recall": 0.597799511002445,
+        "support": 818.0
+      },
+      "Normal": {
+        "f1-score": 0.9702996552638558,
+        "precision": 0.952368558042686,
+        "recall": 0.9889189189189189,
+        "support": 7400.0
+      },
+      "Other": {
+        "f1-score": 0.9797070286251848,
+        "precision": 0.9964461454346637,
+        "recall": 0.9635210150674068,
+        "support": 3783.0
+      },
+      "Probe": {
+        "f1-score": 0.7365453613531522,
+        "precision": 0.7746630727762803,
+        "recall": 0.7020029311187103,
+        "support": 2047.0
+      },
+      "R2L": {
+        "f1-score": 0.6844895137128371,
+        "precision": 0.7439879759519038,
+        "recall": 0.6338028169014085,
+        "support": 2343.0
+      },
+      "U2R": {
+        "f1-score": 0.5373134328358209,
+        "precision": 0.6206896551724138,
+        "recall": 0.47368421052631576,
+        "support": 76.0
+      },
+      "accuracy": 0.8750835003340013,
+      "macro avg": {
+        "f1-score": 0.7315301584154859,
+        "precision": 0.7483822608787808,
+        "recall": 0.7266215672558675,
+        "support": 16467.0
+      },
+      "weighted avg": {
+        "f1-score": 0.8764236277812898,
+        "precision": 0.8818912772377825,
+        "recall": 0.8750835003340013,
+        "support": 16467.0
+      }
+    },
+    "weighted_f1": 0.8764236277812898
+  },
+  "provenance": {
+    "binary_positive_definition": "Label column == 1 or attack_cat != 'Normal'.",
+    "description": "49 network features comprising basic flow, content, time, and window metrics.",
+    "expected_filenames": [
+      "unsw_nb15.csv",
+      "UNSW_NB15_training-set.csv",
+      "UNSW_NB15_testing-set.csv"
+    ],
+    "licensing": "Free for non-commercial research and academic use.",
+    "multiclass_categories": [
+      "Normal",
+      "DoS",
+      "Probe",
+      "R2L",
+      "U2R",
+      "Other"
+    ],
+    "name": "UNSW-NB15",
+    "provenance": "Cyber Range Lab of the Australian Centre for Cyber Security (ACCS) (Moustafa & Slay, 2015). Generated using IXIA PerfectStorm tool to simulate real modern normal and attack network activities.",
+    "target_column": "attack_cat"
+  },
+  "samples": {
+    "test_rows": 16467,
+    "total_dataset_rows": 82332,
+    "train_rows": 65865
+  },
+  "timing": {
+    "inference_throughput_samples_per_sec": 148351.4,
+    "inference_time_seconds": 0.111,
+    "training_time_seconds": 3.231
+  }
+}

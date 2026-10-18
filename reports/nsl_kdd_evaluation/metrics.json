@@ -1,0 +1,165 @@
+{
+  "binary_metrics": {
+    "accuracy": 0.9946135200646378,
+    "confusion_matrix": {
+      "fn": 88,
+      "fp": 69,
+      "tn": 15342,
+      "tp": 14205
+    },
+    "f1": 0.9945041481429622,
+    "false_negative_rate": 0.006156860001399286,
+    "false_positive_rate": 0.004477321393809616,
+    "pr_auc": 0.9997929342160499,
+    "precision": 0.9951660361496427,
+    "recall": 0.9938431399986007,
+    "roc_auc": 0.9997946106210122
+  },
+  "dataset": "nsl_kdd",
+  "multiclass_metrics": {
+    "accuracy": 0.9946135200646378,
+    "balanced_accuracy": 0.882604931619818,
+    "confusion_matrix": [
+      [
+        10671,
+        5,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        11,
+        15342,
+        0,
+        16,
+        40,
+        2
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        13,
+        0,
+        2803,
+        0,
+        0
+      ],
+      [
+        0,
+        58,
+        0,
+        0,
+        716,
+        2
+      ],
+      [
+        0,
+        12,
+        0,
+        0,
+        0,
+        12
+      ]
+    ],
+    "labels": [
+      "DoS",
+      "Normal",
+      "Other",
+      "Probe",
+      "R2L",
+      "U2R"
+    ],
+    "macro_f1": 0.7539193968296499,
+    "per_class": {
+      "DoS": {
+        "f1-score": 0.9992040825881362,
+        "precision": 0.9989702302939525,
+        "recall": 0.9994380443944928,
+        "support": 10677.0
+      },
+      "Normal": {
+        "f1-score": 0.9949093738854122,
+        "precision": 0.9942968243681141,
+        "recall": 0.9955226786061904,
+        "support": 15411.0
+      },
+      "Other": {
+        "f1-score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 0.0
+      },
+      "Probe": {
+        "f1-score": 0.9946770759403832,
+        "precision": 0.9939716312056738,
+        "recall": 0.9953835227272727,
+        "support": 2816.0
+      },
+      "R2L": {
+        "f1-score": 0.9347258485639687,
+        "precision": 0.9470899470899471,
+        "recall": 0.9226804123711341,
+        "support": 776.0
+      },
+      "U2R": {
+        "f1-score": 0.6,
+        "precision": 0.75,
+        "recall": 0.5,
+        "support": 24.0
+      },
+      "accuracy": 0.9946135200646378,
+      "macro avg": {
+        "f1-score": 0.7539193968296499,
+        "precision": 0.7807214388262812,
+        "recall": 0.7355041096831817,
+        "support": 29704.0
+      },
+      "weighted avg": {
+        "f1-score": 0.9945397338767633,
+        "precision": 0.9945151973337771,
+        "recall": 0.9946135200646378,
+        "support": 29704.0
+      }
+    },
+    "weighted_f1": 0.9945397338767633
+  },
+  "provenance": {
+    "binary_positive_definition": "Any non-'Normal' connection flow.",
+    "description": "41 flow & host traffic predictors representing TCP/UDP/ICMP sessions.",
+    "expected_filenames": [
+      "nsl_kdd.csv",
+      "KDDTrain+.txt",
+      "KDDTest+.txt"
+    ],
+    "licensing": "Open for academic and non-commercial research use.",
+    "multiclass_categories": [
+      "Normal",
+      "DoS",
+      "Probe",
+      "R2L",
+      "U2R",
+      "Other"
+    ],
+    "name": "NSL-KDD",
+    "provenance": "University of New Brunswick (UNB), Canadian Institute for Cybersecurity (Tavallaee et al., 2009). Refinement of KDD Cup 99 removing redundant and duplicate connection records.",
+    "target_column": "label"
+  },
+  "samples": {
+    "test_rows": 29704,
+    "total_dataset_rows": 148517,
+    "train_rows": 80000
+  },
+  "timing": {
+    "inference_throughput_samples_per_sec": 194143.8,
+    "inference_time_seconds": 0.153,
+    "training_time_seconds": 2.892
+  }
+}
